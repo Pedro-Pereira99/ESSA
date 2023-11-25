@@ -98,7 +98,7 @@ int main(void)
   {
     /* USER CODE END WHILE */
 	  HAL_GPIO_TogglePin(PA10_GPIO_Port, PA10_Pin);
-	  HAL_Delay(2);
+	  HAL_Delay(1);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
