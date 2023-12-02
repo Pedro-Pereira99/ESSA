@@ -60,12 +60,35 @@ static void MX_TIM3_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim){
-	static int counter_for_T1 = 0;
-	static int counter_for_T2 = 0;
+	int period_ch1;
+	int period_ch2;
 
-
-
+	if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1){
+		period_ch1 = __HAL_TIM_GET_COMPARE(&htim3, TIM_CHANNEL_1) + 1000;
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, period_ch1); //Sets the compare value for channel 1
+	}
+	if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2){
+		period_ch2 = __HAL_TIM_GET_COMPARE(&htim3, TIM_CHANNEL_2) + 2000;
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, period_ch2); //Sets the compare value for channel 2
+		}
+	//if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3){
+	//	}
 }
+
+void HAL_TIM_PeriodElapsedCallback (TIM_HandleTypeDef *htim) {
+	int init_period_ch1;
+	int init_period_ch2;
+
+	if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1){
+		init_period_ch1 = 1;
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, init_period_ch1); //Sets the compare value for channel 1
+	}
+	if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2){
+		init_period_ch2 = 1;
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, init_period_ch2); //Sets the compare value for channel 2
+		}
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -99,15 +122,17 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-
+  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 1); //Sets the compare value for channel 1
+  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 1); //Sets the compare value for channel 2
+  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, 1); //Sets the compare value for channel 3
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1); // Start the timer 3 in OC mode and activate channel 1 with interrupts enabled
   HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_2);// Start the timer 3 in OC mode and activate channel 2 with interrupts enabled
-
   HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_3);// Start the timer 3 in OC mode and activate channel 3 with interrupts enabled
+
   while (1)
   {
     /* USER CODE END WHILE */
@@ -185,7 +210,7 @@ static void MX_TIM3_Init(void)
   htim3.Instance = TIM3;
   htim3.Init.Prescaler = 0;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 999;
+  htim3.Init.Period = 19999;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -207,11 +232,19 @@ static void MX_TIM3_Init(void)
   {
     Error_Handler();
   }
-  sConfigOC.OCMode = TIM_OCMODE_TIMING;
+  sConfigOC.OCMode = TIM_OCMODE_TOGGLE;
   sConfigOC.Pulse = 0;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_OC_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_OC_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_OC_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
   {
     Error_Handler();
   }
@@ -272,7 +305,10 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, LD2_Pin|GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, PC6_Pin|PC7_Pin|PC8_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
@@ -280,12 +316,19 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LD2_Pin PA8 PA9 PA10 */
-  GPIO_InitStruct.Pin = LD2_Pin|GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10;
+  /*Configure GPIO pin : LD2_Pin */
+  GPIO_InitStruct.Pin = LD2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PC6_Pin PC7_Pin PC8_Pin */
+  GPIO_InitStruct.Pin = PC6_Pin|PC7_Pin|PC8_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
