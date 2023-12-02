@@ -107,15 +107,18 @@ int main(void)
   {
 
 	  if(__HAL_TIM_GET_FLAG(&htim3, TIM_FLAG_UPDATE) ){ //If the update flag is raised, then
-	  		  __HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_UPDATE);  // Clear the update flag
-	  		  period_ch2 = 501;
+	  		    // Clear the update flag
+	  		  period_ch2 = __HAL_TIM_GET_COUNTER(&htim3) + 500;
 	  		  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, period_ch2);
+	  		__HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_UPDATE);
 	  	  }
 
 	  if(__HAL_TIM_GET_FLAG(&htim3, TIM_FLAG_CC2) ){  // If the interrupt flag for channel 2 of tim3 is raised, then do:
-		  __HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_CC2); // clear the interrupt flag
+		   // clear the interrupt flag
+
 		  period_ch2 += 500;
 		  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, period_ch2);
+		  __HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_CC2);
 
 	  }
 
