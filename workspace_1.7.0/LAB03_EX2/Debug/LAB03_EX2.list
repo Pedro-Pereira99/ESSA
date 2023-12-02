@@ -387,8 +387,8 @@ int main(void)
   MX_TIM3_Init();
  80004e6:	f000 f8b3 	bl	8000650 <MX_TIM3_Init>
   /* USER CODE BEGIN 2 */
-  int period_ch2 = 499;
- 80004ea:	f240 13f3 	movw	r3, #499	; 0x1f3
+  int period_ch2 = 500;
+ 80004ea:	f44f 73fa 	mov.w	r3, #500	; 0x1f4
  80004ee:	607b      	str	r3, [r7, #4]
   __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 250); //Sets the compare value for channel 1
  80004f0:	4b21      	ldr	r3, [pc, #132]	; (8000578 <main+0xa8>)
@@ -415,67 +415,67 @@ int main(void)
  800050c:	f001 fb28 	bl	8001b60 <HAL_TIM_OC_Start>
   while (1)
   {
-	  if(__HAL_TIM_GET_FLAG(&htim3, TIM_FLAG_CC2)){  // If the interrupt flag for channel 2 of tim3 is raised, then do:
+
+	  if(__HAL_TIM_GET_FLAG(&htim3, TIM_FLAG_UPDATE) ){ //If the update flag is raised, then
  8000510:	4b19      	ldr	r3, [pc, #100]	; (8000578 <main+0xa8>)
  8000512:	681b      	ldr	r3, [r3, #0]
  8000514:	691b      	ldr	r3, [r3, #16]
- 8000516:	f003 0304 	and.w	r3, r3, #4
- 800051a:	2b04      	cmp	r3, #4
- 800051c:	d113      	bne.n	8000546 <main+0x76>
-		  period_ch2 += 500;
- 800051e:	687b      	ldr	r3, [r7, #4]
- 8000520:	f503 73fa 	add.w	r3, r3, #500	; 0x1f4
- 8000524:	607b      	str	r3, [r7, #4]
-		  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, period_ch2);
- 8000526:	4b14      	ldr	r3, [pc, #80]	; (8000578 <main+0xa8>)
- 8000528:	681b      	ldr	r3, [r3, #0]
- 800052a:	687a      	ldr	r2, [r7, #4]
- 800052c:	639a      	str	r2, [r3, #56]	; 0x38
-		  if(period_ch2 > 2200){
- 800052e:	687b      	ldr	r3, [r7, #4]
- 8000530:	f640 0298 	movw	r2, #2200	; 0x898
- 8000534:	4293      	cmp	r3, r2
- 8000536:	dd01      	ble.n	800053c <main+0x6c>
-			  period_ch2 = 0;
- 8000538:	2300      	movs	r3, #0
- 800053a:	607b      	str	r3, [r7, #4]
-		  };
+ 8000516:	f003 0301 	and.w	r3, r3, #1
+ 800051a:	2b01      	cmp	r3, #1
+ 800051c:	d10b      	bne.n	8000536 <main+0x66>
+	  		  __HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_UPDATE);  // Clear the update flag
+ 800051e:	4b16      	ldr	r3, [pc, #88]	; (8000578 <main+0xa8>)
+ 8000520:	681b      	ldr	r3, [r3, #0]
+ 8000522:	f06f 0201 	mvn.w	r2, #1
+ 8000526:	611a      	str	r2, [r3, #16]
+	  		  period_ch2 = 501;
+ 8000528:	f240 13f5 	movw	r3, #501	; 0x1f5
+ 800052c:	607b      	str	r3, [r7, #4]
+	  		  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, period_ch2);
+ 800052e:	4b12      	ldr	r3, [pc, #72]	; (8000578 <main+0xa8>)
+ 8000530:	681b      	ldr	r3, [r3, #0]
+ 8000532:	687a      	ldr	r2, [r7, #4]
+ 8000534:	639a      	str	r2, [r3, #56]	; 0x38
+	  	  }
+
+	  if(__HAL_TIM_GET_FLAG(&htim3, TIM_FLAG_CC2) ){  // If the interrupt flag for channel 2 of tim3 is raised, then do:
+ 8000536:	4b10      	ldr	r3, [pc, #64]	; (8000578 <main+0xa8>)
+ 8000538:	681b      	ldr	r3, [r3, #0]
+ 800053a:	691b      	ldr	r3, [r3, #16]
+ 800053c:	f003 0304 	and.w	r3, r3, #4
+ 8000540:	2b04      	cmp	r3, #4
+ 8000542:	d10c      	bne.n	800055e <main+0x8e>
 		  __HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_CC2); // clear the interrupt flag
- 800053c:	4b0e      	ldr	r3, [pc, #56]	; (8000578 <main+0xa8>)
- 800053e:	681b      	ldr	r3, [r3, #0]
- 8000540:	f06f 0204 	mvn.w	r2, #4
- 8000544:	611a      	str	r2, [r3, #16]
+ 8000544:	4b0c      	ldr	r3, [pc, #48]	; (8000578 <main+0xa8>)
+ 8000546:	681b      	ldr	r3, [r3, #0]
+ 8000548:	f06f 0204 	mvn.w	r2, #4
+ 800054c:	611a      	str	r2, [r3, #16]
+		  period_ch2 += 500;
+ 800054e:	687b      	ldr	r3, [r7, #4]
+ 8000550:	f503 73fa 	add.w	r3, r3, #500	; 0x1f4
+ 8000554:	607b      	str	r3, [r7, #4]
+		  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, period_ch2);
+ 8000556:	4b08      	ldr	r3, [pc, #32]	; (8000578 <main+0xa8>)
+ 8000558:	681b      	ldr	r3, [r3, #0]
+ 800055a:	687a      	ldr	r2, [r7, #4]
+ 800055c:	639a      	str	r2, [r3, #56]	; 0x38
+
 	  }
 
-	  if(__HAL_TIM_GET_FLAG(&htim3, TIM_FLAG_CC1)){ // If the interrupt flag for channel 1 of tim3 is raised, then do:
- 8000546:	4b0c      	ldr	r3, [pc, #48]	; (8000578 <main+0xa8>)
- 8000548:	681b      	ldr	r3, [r3, #0]
- 800054a:	691b      	ldr	r3, [r3, #16]
- 800054c:	f003 0302 	and.w	r3, r3, #2
- 8000550:	2b02      	cmp	r3, #2
- 8000552:	d104      	bne.n	800055e <main+0x8e>
-		  __HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_CC1);
- 8000554:	4b08      	ldr	r3, [pc, #32]	; (8000578 <main+0xa8>)
- 8000556:	681b      	ldr	r3, [r3, #0]
- 8000558:	f06f 0202 	mvn.w	r2, #2
- 800055c:	611a      	str	r2, [r3, #16]
-			  // clear the interrupt flag
-		  }
-
-
-	  if(__HAL_TIM_GET_FLAG(&htim3, TIM_FLAG_UPDATE)){ //If the update flag is raised, then
+	  if(__HAL_TIM_GET_FLAG(&htim3, TIM_FLAG_CC1) ){ // If the interrupt flag for channel 1 of tim3 is raised, then do:
  800055e:	4b06      	ldr	r3, [pc, #24]	; (8000578 <main+0xa8>)
  8000560:	681b      	ldr	r3, [r3, #0]
  8000562:	691b      	ldr	r3, [r3, #16]
- 8000564:	f003 0301 	and.w	r3, r3, #1
- 8000568:	2b01      	cmp	r3, #1
+ 8000564:	f003 0302 	and.w	r3, r3, #2
+ 8000568:	2b02      	cmp	r3, #2
  800056a:	d1d1      	bne.n	8000510 <main+0x40>
-		  __HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_UPDATE);  // Clear the update flag
+
+	  	  __HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_CC1);  // clear the interrupt flag
  800056c:	4b02      	ldr	r3, [pc, #8]	; (8000578 <main+0xa8>)
  800056e:	681b      	ldr	r3, [r3, #0]
- 8000570:	f06f 0201 	mvn.w	r2, #1
+ 8000570:	f06f 0202 	mvn.w	r2, #2
  8000574:	611a      	str	r2, [r3, #16]
-	  if(__HAL_TIM_GET_FLAG(&htim3, TIM_FLAG_CC2)){  // If the interrupt flag for channel 2 of tim3 is raised, then do:
+	  if(__HAL_TIM_GET_FLAG(&htim3, TIM_FLAG_UPDATE) ){ //If the update flag is raised, then
  8000576:	e7cb      	b.n	8000510 <main+0x40>
  8000578:	20000028 	.word	0x20000028
 
@@ -668,9 +668,9 @@ static void MX_TIM3_Init(void)
  800068c:	4b2f      	ldr	r3, [pc, #188]	; (800074c <MX_TIM3_Init+0xfc>)
  800068e:	2200      	movs	r2, #0
  8000690:	609a      	str	r2, [r3, #8]
-  htim3.Init.Period = 2499;
+  htim3.Init.Period = 2501;
  8000692:	4b2e      	ldr	r3, [pc, #184]	; (800074c <MX_TIM3_Init+0xfc>)
- 8000694:	f640 12c3 	movw	r2, #2499	; 0x9c3
+ 8000694:	f640 12c5 	movw	r2, #2501	; 0x9c5
  8000698:	60da      	str	r2, [r3, #12]
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
  800069a:	4b2c      	ldr	r3, [pc, #176]	; (800074c <MX_TIM3_Init+0xfc>)

@@ -108,14 +108,14 @@ int main(void)
   {
 
 	  if(__HAL_TIM_GET_FLAG(&htim3, TIM_FLAG_CC2)){  // If the interrupt flag for channel 2 of tim3 is raised, then do:
-		  period_ch2 += 500;
-		  HAL_GPIO_TogglePin(PA10_GPIO_Port, PA10_Pin); // Toggle the pin PA10
-		  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, period_ch2);
+		  period_ch2 += 500; // Increase the compare value of channel 2
+		  HAL_GPIO_TogglePin(PC7_GPIO_Port, PC7_Pin); // Toggle the pin PA10
+		  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, period_ch2); // Update the compare value of channel 2
 		  __HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_CC2); // clear the interrupt flag
 	  }
 
 	  if(__HAL_TIM_GET_FLAG(&htim3, TIM_FLAG_CC1)){ // If the interrupt flag for channel 1 of tim3 is raised, then do:
-		  HAL_GPIO_TogglePin(PA8_GPIO_Port, PA8_Pin);
+		  HAL_GPIO_TogglePin(PC6_GPIO_Port, PC6_Pin); // Toggle the pin
 	  	  __HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_CC1);
 	  		  // clear the interrupt flag
 	  	  }
@@ -123,8 +123,8 @@ int main(void)
 
 	  if(__HAL_TIM_GET_FLAG(&htim3, TIM_FLAG_UPDATE)){ //If the update flag is raised, then
 		  __HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_UPDATE);  // Clear the update flag
-		  period_ch2 = 499;
-		  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, period_ch2);
+		  period_ch2 = 499; // Initial compare value for channel 2
+		  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, period_ch2); // Sets the compare value of channel 2 back to its initial value
 	  }
 
 	 //__HAL_DBGMCU_FREEZE_TIM3() //Freezes the timer for debugging
@@ -294,7 +294,10 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, LD2_Pin|PA8_Pin|PA10_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, PC6_Pin|PC7_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
@@ -302,12 +305,19 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LD2_Pin PA8_Pin PA10_Pin */
-  GPIO_InitStruct.Pin = LD2_Pin|PA8_Pin|PA10_Pin;
+  /*Configure GPIO pin : LD2_Pin */
+  GPIO_InitStruct.Pin = LD2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PC6_Pin PC7_Pin */
+  GPIO_InitStruct.Pin = PC6_Pin|PC7_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
