@@ -34,34 +34,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := lab1_1_2_STM32Cube
+BUILD_ARTIFACT_NAME := lab02_ex1
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-lab1_1_2_STM32Cube.elf \
+lab02_ex1.elf \
 
 MAP_FILES += \
-lab1_1_2_STM32Cube.map \
+lab02_ex1.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-lab1_1_2_STM32Cube.list \
+lab02_ex1.list \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: lab1_1_2_STM32Cube.elf secondary-outputs
+main-build: lab02_ex1.elf secondary-outputs
 
 # Tool invocations
-lab1_1_2_STM32Cube.elf lab1_1_2_STM32Cube.map: $(OBJS) $(USER_OBJS) C:\Users\morae\STM32CubeIDE\workspace_1.7.0\lab1_1_2_STM32Cube\STM32F401RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "lab1_1_2_STM32Cube.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\morae\STM32CubeIDE\workspace_1.7.0\lab1_1_2_STM32Cube\STM32F401RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="lab1_1_2_STM32Cube.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+lab02_ex1.elf lab02_ex1.map: $(OBJS) $(USER_OBJS) C:\Users\morae\STM32CubeIDE\workspace_1.7.0\lab02_ex1\STM32F401RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "lab02_ex1.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\morae\STM32CubeIDE\workspace_1.7.0\lab02_ex1\STM32F401RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="lab02_ex1.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -70,14 +70,14 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-lab1_1_2_STM32Cube.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "lab1_1_2_STM32Cube.list"
+lab02_ex1.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "lab02_ex1.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) default.size.stdout lab1_1_2_STM32Cube.elf lab1_1_2_STM32Cube.list lab1_1_2_STM32Cube.map
+	-$(RM) default.size.stdout lab02_ex1.elf lab02_ex1.list lab02_ex1.map
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
