@@ -133,6 +133,8 @@ int main(void)
   {
     /* USER CODE END WHILE */
 
+	  //  We need to observe the periods of the waves generated in pins PC6, PC7 and PC8
+	  // And need to observe if the green led toggles when there is a external input (push button)
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

@@ -93,7 +93,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-  int period_ch2 = 500;
+  int period_ch2 = 400;
   __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 250); //Sets the compare value for channel 1
   __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, period_ch2); //Sets the compare value for channel 2
 
@@ -107,26 +107,23 @@ int main(void)
   {
 
 	  if(__HAL_TIM_GET_FLAG(&htim3, TIM_FLAG_UPDATE) ){ //If the update flag is raised, then
-	  		    // Clear the update flag
-	  		  period_ch2 = __HAL_TIM_GET_COUNTER(&htim3) + 500;
-	  		  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, period_ch2);
-	  		__HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_UPDATE);
+		  	__HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_UPDATE);    // Clear the update flag
+	  		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 400); // Reset the value in the compare register of channel 2
 	  	  };
 
 	  if(__HAL_TIM_GET_FLAG(&htim3, TIM_FLAG_CC2) ){  // If the interrupt flag for channel 2 of tim3 is raised, then do:
-		   // clear the interrupt flag
-
-		  period_ch2 += 500;
-		  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, period_ch2);
-		  __HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_CC2);
-
+		  period_ch2 = __HAL_TIM_GET_COUNTER(&htim3) + 500; // Increase the compare value of channel 2 by 500
+		  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, period_ch2); // Set the new compare value
+		  __HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_CC2); // clear the interrupt flag
 	  }
 
 	  if(__HAL_TIM_GET_FLAG(&htim3, TIM_FLAG_CC1) ){ // If the interrupt flag for channel 1 of tim3 is raised, then do:
 
 	  	  __HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_CC1);  // clear the interrupt flag
 	  	  }
-
+	  // The channel 1 generates of 2.5 KHz without the need of updating its compare value.
+	  // This was done by choosing the appropriate values for the internal clock and the ARR
+	  // Thus, to have a 12.5 KHz wave in channel 2, it should be enough to have the compare value matching the timer counter 5 times between 0 and the Auto Reload (with regular intervals).
 
 	 //__HAL_DBGMCU_FREEZE_TIM3() //Freezes the timer for debugging
 
@@ -205,7 +202,7 @@ static void MX_TIM3_Init(void)
   htim3.Instance = TIM3;
   htim3.Init.Prescaler = 0;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 2501;
+  htim3.Init.Period = 2499;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)

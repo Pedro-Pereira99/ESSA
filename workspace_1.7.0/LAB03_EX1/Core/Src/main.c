@@ -93,7 +93,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-  int period_ch2 = 499;
+  int period_ch2 = 400;
   __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 250); //Sets the compare value for channel 1
 
   __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, period_ch2); //Sets the compare value for channel 2
@@ -108,10 +108,11 @@ int main(void)
   {
 
 	  if(__HAL_TIM_GET_FLAG(&htim3, TIM_FLAG_CC2)){  // If the interrupt flag for channel 2 of tim3 is raised, then do:
-		  period_ch2 += 500; // Increase the compare value of channel 2
-		  HAL_GPIO_TogglePin(PC7_GPIO_Port, PC7_Pin); // Toggle the pin PA10
-		  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, period_ch2); // Update the compare value of channel 2
 		  __HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_CC2); // clear the interrupt flag
+		  period_ch2 = __HAL_TIM_GET_COUNTER(&htim3) + 500; // Increase the compare value of channel 2
+		  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, period_ch2); // Update the compare value of channel 2
+		  HAL_GPIO_TogglePin(PC7_GPIO_Port, PC7_Pin); // Toggle the pin PA10
+
 	  }
 
 	  if(__HAL_TIM_GET_FLAG(&htim3, TIM_FLAG_CC1)){ // If the interrupt flag for channel 1 of tim3 is raised, then do:
@@ -123,9 +124,13 @@ int main(void)
 
 	  if(__HAL_TIM_GET_FLAG(&htim3, TIM_FLAG_UPDATE)){ //If the update flag is raised, then
 		  __HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_UPDATE);  // Clear the update flag
-		  period_ch2 = 499; // Initial compare value for channel 2
+		  period_ch2 = 400; // Initial compare value for channel 2
 		  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, period_ch2); // Sets the compare value of channel 2 back to its initial value
 	  }
+	  // The channel 1 generates of 2.5 KHz without the need of updating its compare value.
+	  // This was done by choosing the appropriate values for the internal clock and the ARR
+	  // Thus, to have a 12.5 KHz wave in channel 2, it should be enough to have the compare value matching the timer counter 5 times between 0 and the Auto Reload (with regular intervals).
+
 
 	 //__HAL_DBGMCU_FREEZE_TIM3() //Freezes the timer for debugging
     /* USER CODE END WHILE */

@@ -127,6 +127,7 @@ int main(void)
   	  		__HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_UPDATE); // Clear the update flag
   	  	  };
   }
+  // We need to observe the variation of brightness of the green LED
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
