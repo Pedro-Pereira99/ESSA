@@ -59,36 +59,29 @@ static void MX_TIM3_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim){
-	int period_ch1;
-	int period_ch2;
-
-	if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1){
-		period_ch1 = __HAL_TIM_GET_COMPARE(&htim3, TIM_CHANNEL_1) + 1000;
-		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, period_ch1); //Sets the compare value for channel 1
+void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim){
+ // Operations to be performed each time the Timer counter reaches the value of one of the compare registers
+	if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1){ // If the func was called by channel 1
+		// We update teh value of the compare register of channel 1. We want it to be set to 1000; 6000; 11000; 16000; and return to the initial value
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, __HAL_TIM_GET_COMPARE(&htim3, TIM_CHANNEL_1)+5000); //Sets the compare value for channel 1
 	}
 	if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2){
-		period_ch2 = __HAL_TIM_GET_COMPARE(&htim3, TIM_CHANNEL_2) + 2000;
-		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, period_ch2); //Sets the compare value for channel 2
+		// We update teh value of the compare register of channel 1. We want it to be set to 1000; then 11000; and return to the initial value
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, __HAL_TIM_GET_COMPARE(&htim3, TIM_CHANNEL_2)+10000); //Sets the compare value for channel 2
 		}
 	//if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3){
-	//	}
+		//	} Since the desired period for channel 3 is the same as the period configure for the reload of the timer
+		// there is no need to change the compare value for channel 3
+		// Furthermore, since the output mode used is "toggle on match", there is no need for using the GPIO toggle function here
+
 }
 
 void HAL_TIM_PeriodElapsedCallback (TIM_HandleTypeDef *htim) {
-	int init_period_ch1;
-	int init_period_ch2;
-
-	if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1){
-		init_period_ch1 = 1;
-		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, init_period_ch1); //Sets the compare value for channel 1
-	}
-	if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2){
-		init_period_ch2 = 1;
-		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, init_period_ch2); //Sets the compare value for channel 2
-		}
+// Operations to be performed each time the Timer counter reaches the value of the ARR Register
+//
+	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 1000); //Sets the compare value for channel 1
+	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 1000); //Sets the compare value for channel 2
 }
-
 /* USER CODE END 0 */
 
 /**
@@ -122,9 +115,9 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 1); //Sets the compare value for channel 1
-  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 1); //Sets the compare value for channel 2
-  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, 1); //Sets the compare value for channel 3
+  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 1000); //Sets the compare value for channel 1
+  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 1000); //Sets the compare value for channel 2
+  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, 1000); //Sets the compare value for channel 3
   /* USER CODE END 2 */
 
   /* Infinite loop */
