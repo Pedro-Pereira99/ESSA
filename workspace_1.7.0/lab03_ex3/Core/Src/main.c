@@ -61,27 +61,24 @@ static void MX_TIM3_Init(void);
 /* USER CODE BEGIN 0 */
 void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim){
  // Operations to be performed each time the Timer counter reaches the value of one of the compare registers
-	if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1){ // If the func was called by channel 1
-		// We update teh value of the compare register of channel 1. We want it to be set to 1000; 6000; 11000; 16000; and return to the initial value
-		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, __HAL_TIM_GET_COMPARE(&htim3, TIM_CHANNEL_1)+5000); //Sets the compare value for channel 1
+	if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1) {
+		// Code for Channel 1
+		//__HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_CC1);
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, (__HAL_TIM_GET_COMPARE(&htim3, TIM_CHANNEL_1)+5000)%20000); //Sets the compare value for channel 1
+
 	}
-	if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2){
-		// We update teh value of the compare register of channel 1. We want it to be set to 1000; then 11000; and return to the initial value
-		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, __HAL_TIM_GET_COMPARE(&htim3, TIM_CHANNEL_2)+10000); //Sets the compare value for channel 2
-		}
-	//if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3){
-		//	} Since the desired period for channel 3 is the same as the period configure for the reload of the timer
-		// there is no need to change the compare value for channel 3
-		// Furthermore, since the output mode used is "toggle on match", there is no need for using the GPIO toggle function here
+	if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2) {
+		// Code for Channel 2
+		//__HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_CC2);
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, (__HAL_TIM_GET_COMPARE(&htim3, TIM_CHANNEL_2)+10000)%20000); //Sets the compare value for channel 2
 
+	}
+
+	// Since the desired period for channel 3 is the same as the period configure for the reload of the timer
+	// there is no need to change the compare value for channel 3
+	// Furthermore, since the output mode used is "toggle on match", there is no need for using the GPIO toggle function here
 }
 
-void HAL_TIM_PeriodElapsedCallback (TIM_HandleTypeDef *htim) {
-// Operations to be performed each time the Timer counter reaches the value of the ARR Register
-//
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 1000); //Sets the compare value for channel 1
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 1000); //Sets the compare value for channel 2
-}
 /* USER CODE END 0 */
 
 /**
@@ -123,13 +120,19 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1); // Start the timer 3 in OC mode and activate channel 1 with interrupts enabled
+  HAL_TIM_Base_Start_IT(&htim3);
   HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_2);// Start the timer 3 in OC mode and activate channel 2 with interrupts enabled
-  HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_3);// Start the timer 3 in OC mode and activate channel 3 with interrupts enabled
+  HAL_TIM_OC_Start(&htim3, TIM_CHANNEL_3);// Start the timer 3 in OC mode and activate channel 3
 
   while (1)
   {
+
+	//__HAL_DBGMCU_FREEZE_TIM3();
+
+	  //  We need to observe the periods of the waves generated in pins PC6, PC7 and PC8
+	  // And need to observe if the green led toggles when there is a external input (push button)
     /* USER CODE END WHILE */
-//  We need to observe the periods of the waves generated in pins PC6, PC7 and PC8
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -225,7 +228,7 @@ static void MX_TIM3_Init(void)
   {
     Error_Handler();
   }
-  sConfigOC.OCMode = TIM_OCMODE_TOGGLE;
+  sConfigOC.OCMode = TIM_OCMODE_TIMING;
   sConfigOC.Pulse = 0;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
