@@ -57,6 +57,18 @@ static void MX_USART2_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+int volatile correctlySentData = 0;
+int volatile correctlyReceivedData = 0;
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
+	  // Set Tx flag
+	  correctlySentData = 1;
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+	  // Set Rx flag
+	  correctlyReceivedData = 1;
+}
 /* USER CODE END 0 */
 
 /**
@@ -94,34 +106,36 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  int volatile correctlySentData = 0;
-  int volatile correctlyReceivedData = 0;
   char welcome_message[] = "Write an integer number from 1 to 3:\r\n";
   char received_number;
   char pressed[] = "PRESSED";
   char released[] = "RELEASED";
 
+  // Print welcome message
+  HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
+
   while (1)
   {
 	  // Print welcome message
-	   HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
+	   //HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
 
-	   // Prepare UART to receive a single character
-	   HAL_UART_Receive_IT(&huart2, &received_number, sizeof(received_number));
-
-	   // Check TX flag
+	  // Check TX flag
 	   if (correctlySentData == 1) {
 	   correctlySentData = 0;
 
 	   }
-	   // Check RX flag
+
+	   // Prepare UART to receive a single character
+	   HAL_UART_Receive_IT(&huart2, &received_number, 1);
+
+	   	   // Check RX flag
 	   if (correctlyReceivedData == 1) {
 	   correctlyReceivedData = 0;
-	   	   if(received_numer==1){
-	   		HAL_GPIO_TogglePin(LD2_GPIO_PORT, LD2_Pin); //If the received number is 1, then toggle the LED
+	   	   if(received_number == '1'){
+	   		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin); //If the received number is 1, then toggle the LED
 	   	   }
-	   	   else if(received_numer==2){
-	   		   if(HAL_GPIO_ReadPin(B1_GPIO_PORT, B1_Pin)==GPIO_PIN_SET){
+	   	   else if(received_number == '2'){
+	   		   if(HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin)==GPIO_PIN_SET){
 	   			   HAL_UART_Transmit_IT(&huart2, (uint8_t *)released, sizeof(char)*strlen(released));
 	   			   // In case the received number is 2 and the button is released, the code should transmit the RELEASED message
 	   		   }
@@ -130,7 +144,7 @@ int main(void)
 	   			   	   // If the received number is 2 and the button is pressed, the PRESSED message is transmitted
 	   		   }
 	   		   	   }
-	   	   else if(received_numer==3){
+	   	   else if(received_number == '3'){
 	   		   HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
 	   		   // If the received number is 3, then print the welcome menu again
 	   	   }
@@ -143,15 +157,9 @@ int main(void)
   /* USER CODE END 3 */
 }
 
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
-	  // Set Tx flag
-	  correctlySentData = 0;
-}
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
-	  // Set Rx flag
-	  correctlyReceivedData = 1;
-}
+
+
 
 /**
   * @brief System Clock Configuration

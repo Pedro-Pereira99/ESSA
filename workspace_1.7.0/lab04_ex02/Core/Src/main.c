@@ -40,6 +40,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 
 UART_HandleTypeDef huart2;
@@ -53,12 +54,33 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM3_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+volatile int CaptureCompare_FLAG = 0; // Capture compare flag
+volatile int  correctlySentData = 0;
+volatile int correctlyReceivedData = 0;
+
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim){
+	CaptureCompare_FLAG = 1;
+}
+
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
+	  // Set Tx flag
+	  correctlySentData = 1;
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+	  // Set Rx flag
+	  correctlyReceivedData = 1;
+}
+
+
 
 /* USER CODE END 0 */
 
@@ -92,48 +114,86 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_TIM3_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   int Captured_Value;
-  volatile int CaptureCompare_FLAG = 0; // Capture compare flag
-  int edge_counter = 0; // This will help to keep track of how many times an edge was detected
-  int rising_edge;
-  int falling_edge;
-  bool state_of_pin;
+  int r_edge_counter = 0; // This will help to keep track of how many times a rising edge was detected
+  int f_edge_counter = 0; // The same, but for falling edges
+  int rising_edge[2];
+  int falling_edge[2];
+  char message[] = "Test message"; // need to change this later  char received_number;
+  char received_number;
+
+  char welcome_message[] = "The code is now running";
+
+  int period;
+  int freq;
+  int duty_cycle;
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_OC_Start(&htim2, TIM_CHANNEL_1);
+
+  HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
+
   while (1)
   {
-	Captured_Value = HAL_TIM_ReadCapturedValue(&htim3, TIM_CHANNEL_1); // Read the captured value
 
 	// The following IF code was done taking into consideration the logic for interrupts presented in the previous exercise
 	// In which the callback function simply sets a flag, and all the necessary operations based on this are realized in the while loop
 
 	if(CaptureCompare_FLAG == 1){
 		CaptureCompare_FLAG = 0;
-		edge_counter++;
-		if(HAL_GPIO_ReadPin(PA6_GPIO_PORT, PA6_Pin)==HIGH){
-		// I am not sure if this is the PIN we are supposed to read
-			rising_edge = Captured_Value;
-			HAL_UART_Transmit_IT(&huart2, (uint8_t *)rising_edge, sizeof(char)*strlen(rising_edge));
+		Captured_Value = HAL_TIM_ReadCapturedValue(&htim3, TIM_CHANNEL_1); // Read the captured value
+
+		if(r_edge_counter == f_edge_counter){
+			rising_edge[r_edge_counter] = Captured_Value;
+			r_edge_counter++;
 		}
 
+		else{
+			falling_edge[f_edge_counter] = Captured_Value;
+			f_edge_counter++;
+		}
 	}
-	 /* USER CODE END WHILE */
+
+	if(f_edge_counter > 1 & r_edge_counter > 1){
+		r_edge_counter=0;
+		f_edge_counter=0;
+
+		period = abs(rising_edge[0] - rising_edge[1]); // This is the period in ticks
+		// ARR is 39,999 and Pre-Scaler is 2099, with internal clock 84 MHz
+		// Thus, the time it takes to reload is 40,000 * 2,100 / 84,000,000 = 1 second
+		// We have then that 1 tick of the counter = 1/40,000 seconds;
+		// period in seconds = period in ticks /40,000
+		freq = 1/period * 40000; // frequency in Hz
+		duty_cycle = abs(rising_edge[0] - falling_edge[0])/period;
+
+		//message[0] = 'y';
+		//HAL_UART_Transmit_IT(&huart2, (uint8_t *)message, sizeof(char)*strlen(message));
 
 
+ 	}
 
+
+	HAL_UART_Receive_IT(&huart2, &received_number, 1);
+	// Check RX flag
+   if (correctlyReceivedData == 1) {
+   correctlyReceivedData = 0;
+	   if(received_number == '1'){
+   		   HAL_UART_Transmit_IT(&huart2, (uint8_t *)message, sizeof(char)*strlen(message));
+	   }
+   }
+
+
+    /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
-}
-
-void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim){
-	CaptureCompare_FLAG = 1;
 }
 
 /**
@@ -183,6 +243,55 @@ void SystemClock_Config(void)
 }
 
 /**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 0;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 839999;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_OC_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_TOGGLE;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_OC_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+  HAL_TIM_MspPostInit(&htim2);
+
+}
+
+/**
   * @brief TIM3 Initialization Function
   * @param None
   * @retval None
@@ -202,9 +311,9 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 0;
+  htim3.Init.Prescaler = 2099;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 65535;
+  htim3.Init.Period = 39999;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
