@@ -63,13 +63,11 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim){
  // Operations to be performed each time the Timer counter reaches the value of one of the compare registers
 	if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1) {
 		// Code for Channel 1
-		//__HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_CC1);
 		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, (__HAL_TIM_GET_COMPARE(&htim3, TIM_CHANNEL_1)+5000)%20000); //Sets the compare value for channel 1
 
 	}
 	if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2) {
 		// Code for Channel 2
-		//__HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_CC2);
 		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, (__HAL_TIM_GET_COMPARE(&htim3, TIM_CHANNEL_2)+10000)%20000); //Sets the compare value for channel 2
 
 	}

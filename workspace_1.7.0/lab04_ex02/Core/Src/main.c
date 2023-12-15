@@ -62,7 +62,7 @@ static void MX_TIM2_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 volatile int CaptureCompare_FLAG = 0; // Capture compare flag
-volatile int  correctlySentData = 0;
+//volatile int  correctlySentData = 0;
 volatile int correctlyReceivedData = 0;
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim){
@@ -70,10 +70,10 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim){
 }
 
 
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
+//void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
 	  // Set Tx flag
-	  correctlySentData = 1;
-}
+//	  correctlySentData = 1;
+//}
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 	  // Set Rx flag
@@ -121,10 +121,12 @@ int main(void)
   int f_edge_counter = 0; // The same, but for falling edges
   int rising_edge[2];
   int falling_edge[2];
-  char message[] = "Test message"; // need to change this later  char received_number;
+  char buffer[40];
+  //char buffer_dc; //
+
   char received_number;
 
-  char welcome_message[] = "The code is now running";
+  char welcome_message[] = "The code is now running. Type 1 to see the frequency and 2 to see the duty cycle. \n";
 
   int period;
   int freq;
@@ -135,7 +137,7 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1);
-  HAL_TIM_OC_Start(&htim2, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
 
   HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
 
@@ -149,7 +151,7 @@ int main(void)
 		CaptureCompare_FLAG = 0;
 		Captured_Value = HAL_TIM_ReadCapturedValue(&htim3, TIM_CHANNEL_1); // Read the captured value
 
-		if(r_edge_counter == f_edge_counter){
+		if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6) == 1){
 			rising_edge[r_edge_counter] = Captured_Value;
 			r_edge_counter++;
 		}
@@ -160,34 +162,33 @@ int main(void)
 		}
 	}
 
-	if(f_edge_counter > 1 & r_edge_counter > 1){
+	if(f_edge_counter > 1 && r_edge_counter > 1){
 		r_edge_counter=0;
 		f_edge_counter=0;
 
-		period = abs(rising_edge[0] - rising_edge[1]); // This is the period in ticks
-		// ARR is 39,999 and Pre-Scaler is 2099, with internal clock 84 MHz
-		// Thus, the time it takes to reload is 40,000 * 2,100 / 84,000,000 = 1 second
-		// We have then that 1 tick of the counter = 1/40,000 seconds;
+		period = rising_edge[1] - rising_edge[0]; // This is the period in ticks
+		// The pre-scaler used was of 2099. Therefore, 1 second = 84.000.000 / (2099 + 1) ticks.
+		// We have then that 1 tick of  the counter = 1/40,000 seconds;
 		// period in seconds = period in ticks /40,000
-		freq = 1/period * 40000; // frequency in Hz
-		duty_cycle = abs(rising_edge[0] - falling_edge[0])/period;
-
-		//message[0] = 'y';
-		//HAL_UART_Transmit_IT(&huart2, (uint8_t *)message, sizeof(char)*strlen(message));
+		freq = 40000/period; // frequency in Hz
+		duty_cycle = 100*abs(rising_edge[0] - falling_edge[0])/period;
 
 
  	}
 
-
 	HAL_UART_Receive_IT(&huart2, &received_number, 1);
+
 	// Check RX flag
    if (correctlyReceivedData == 1) {
-   correctlyReceivedData = 0;
+	   correctlyReceivedData = 0;
 	   if(received_number == '1'){
-   		   HAL_UART_Transmit_IT(&huart2, (uint8_t *)message, sizeof(char)*strlen(message));
+ 		   HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "The measured frequency is %d Hz \n", freq));
 	   }
-   }
 
+	   else if(received_number == '2'){
+		   HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "The measured duty cycle is %d%% \n", duty_cycle));
+	   	   }
+   }
 
     /* USER CODE END WHILE */
 
@@ -266,7 +267,7 @@ static void MX_TIM2_Init(void)
   htim2.Init.Period = 839999;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_OC_Init(&htim2) != HAL_OK)
+  if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
   {
     Error_Handler();
   }
@@ -276,11 +277,11 @@ static void MX_TIM2_Init(void)
   {
     Error_Handler();
   }
-  sConfigOC.OCMode = TIM_OCMODE_TOGGLE;
-  sConfigOC.Pulse = 0;
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 420000;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  if (HAL_TIM_OC_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
   {
     Error_Handler();
   }
@@ -313,7 +314,7 @@ static void MX_TIM3_Init(void)
   htim3.Instance = TIM3;
   htim3.Init.Prescaler = 2099;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 39999;
+  htim3.Init.Period = 60000;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -335,7 +336,7 @@ static void MX_TIM3_Init(void)
   {
     Error_Handler();
   }
-  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_BOTHEDGE;
   sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
   sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
   sConfigIC.ICFilter = 0;

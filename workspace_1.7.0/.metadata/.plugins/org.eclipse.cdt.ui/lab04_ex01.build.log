@@ -1,20 +1,20 @@
-15:36:53 **** Incremental Build of configuration Debug for project lab04_ex01 ****
+13:27:45 **** Build of configuration Debug for project lab04_ex01 ****
 make -j8 all 
 arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F401xE -c -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
 ../Core/Src/main.c: In function 'main':
-../Core/Src/main.c:105:74: warning: implicit declaration of function 'strlen' [-Wimplicit-function-declaration]
-  105 |   HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
+../Core/Src/main.c:115:74: warning: implicit declaration of function 'strlen' [-Wimplicit-function-declaration]
+  115 |   HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
       |                                                                          ^~~~~~
 ../Core/Src/main.c:21:1: note: include '<string.h>' or provide a declaration of 'strlen'
    20 | #include "main.h"
   +++ |+#include <string.h>
    21 | 
-../Core/Src/main.c:105:74: warning: incompatible implicit declaration of built-in function 'strlen' [-Wbuiltin-declaration-mismatch]
-  105 |   HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
+../Core/Src/main.c:115:74: warning: incompatible implicit declaration of built-in function 'strlen' [-Wbuiltin-declaration-mismatch]
+  115 |   HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
       |                                                                          ^~~~~~
-../Core/Src/main.c:105:74: note: include '<string.h>' or provide a declaration of 'strlen'
-../Core/Src/main.c:119:41: warning: pointer targets in passing argument 2 of 'HAL_UART_Receive_IT' differ in signedness [-Wpointer-sign]
-  119 |            HAL_UART_Receive_IT(&huart2, &received_number, 1);
+../Core/Src/main.c:115:74: note: include '<string.h>' or provide a declaration of 'strlen'
+../Core/Src/main.c:129:41: warning: pointer targets in passing argument 2 of 'HAL_UART_Receive_IT' differ in signedness [-Wpointer-sign]
+  129 |            HAL_UART_Receive_IT(&huart2, &received_number, 1);
       |                                         ^~~~~~~~~~~~~~~~
       |                                         |
       |                                         char *
@@ -37,5 +37,5 @@ Finished building: default.size.stdout
 Finished building: lab04_ex01.list
  
 
-15:36:54 Build Finished. 0 errors, 3 warnings. (took 1s.84ms)
+13:27:48 Build Finished. 0 errors, 3 warnings. (took 3s.522ms)
 
