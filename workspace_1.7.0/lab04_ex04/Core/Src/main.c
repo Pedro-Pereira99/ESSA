@@ -62,12 +62,16 @@ static void MX_TIM3_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-volatile int conversionComplete = 0;
-
+volatile int convertedValue;
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc){
-	conversionComplete = 1;
+	convertedValue = HAL_ADC_GetValue(&hadc1);
 }
 
+
+volatile int timerFlag;
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+	timerFlag = 1; // A flag will be set every time the timer reloads. It reloads every 500 ms.
+}
 
 /* USER CODE END 0 */
 
@@ -108,18 +112,19 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  int convertedValue;
+
   char buffer[40];
 
   HAL_ADC_Start_IT(&hadc1);
-  HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_Base_Start_IT(&htim3);
 
   while (1)
   {
-	if(convertedComplete == 1){
-		convertedComplete = 0;
-		convertedValue = HAL_ADC_GetValue(&hadc1);
+	if(timerFlag == 1){ // This flag is set every 500 ms. This means our code will transmit the output data every 0.5 second
+		timerFlag = 0; // Clear the flag
 		HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "Converted value: %d \n", convertedValue));
+		// convertedValue is a volatile integer that where the converted value is written
+		// This value is altered every time the callback function for "Conversion Completed" is called i.e. every time a conversion occurs
 	}
 
     /* USER CODE END WHILE */
@@ -249,7 +254,7 @@ static void MX_TIM3_Init(void)
   htim3.Instance = TIM3;
   htim3.Init.Prescaler = 2099;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 39999;
+  htim3.Init.Period = 19999;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -271,7 +276,7 @@ static void MX_TIM3_Init(void)
   {
     Error_Handler();
   }
-  sConfigOC.OCMode = TIM_OCMODE_TOGGLE;
+  sConfigOC.OCMode = TIM_OCMODE_TIMING;
   sConfigOC.Pulse = 0;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -282,7 +287,6 @@ static void MX_TIM3_Init(void)
   /* USER CODE BEGIN TIM3_Init 2 */
 
   /* USER CODE END TIM3_Init 2 */
-  HAL_TIM_MspPostInit(&htim3);
 
 }
 
