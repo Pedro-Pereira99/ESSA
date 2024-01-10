@@ -107,7 +107,7 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   char welcome_message[] = "Write an integer number from 1 to 3:\r\n";
-  char received_number;
+  char received_number; // Variable that will store the input data
   char pressed[] = "PRESSED";
   char released[] = "RELEASED";
 
@@ -116,41 +116,38 @@ int main(void)
 
   while (1)
   {
-	  // Print welcome message
-	   //HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
+  // Check TX flag
+   if (correctlySentData == 1) {
+   correctlySentData = 0;
 
-	  // Check TX flag
-	   if (correctlySentData == 1) {
-	   correctlySentData = 0;
+   }
 
+   // Prepare UART to receive a single character
+   HAL_UART_Receive_IT(&huart2, &received_number, 1);
+
+	   // Check RX flag
+   if (correctlyReceivedData == 1) {
+   correctlyReceivedData = 0;
+	   if(received_number == '1'){
+		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin); //If the received number is 1, then toggle the LED
 	   }
-
-	   // Prepare UART to receive a single character
-	   HAL_UART_Receive_IT(&huart2, &received_number, 1);
-
-	   	   // Check RX flag
-	   if (correctlyReceivedData == 1) {
-	   correctlyReceivedData = 0;
-	   	   if(received_number == '1'){
-	   		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin); //If the received number is 1, then toggle the LED
-	   	   }
-	   	   else if(received_number == '2'){
-	   		   if(HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin)==GPIO_PIN_SET){
-	   			   HAL_UART_Transmit_IT(&huart2, (uint8_t *)released, sizeof(char)*strlen(released));
-	   			   // In case the received number is 2 and the button is released, the code should transmit the RELEASED message
-	   		   }
-	   		   else{
-	   			   HAL_UART_Transmit_IT(&huart2, (uint8_t *)pressed, sizeof(char)*strlen(pressed));
-	   			   	   // If the received number is 2 and the button is pressed, the PRESSED message is transmitted
-	   		   }
-	   		   	   }
-	   	   else if(received_number == '3'){
-	   		   HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
-	   		   // If the received number is 3, then print the welcome menu again
-	   	   }
+	   else if(received_number == '2'){
+		   if(HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin)==GPIO_PIN_SET){
+			   HAL_UART_Transmit_IT(&huart2, (uint8_t *)released, sizeof(char)*strlen(released));
+			   // In case the received number is 2 and the button is released, the code should transmit the RELEASED message
+		   }
+		   else{
+			   HAL_UART_Transmit_IT(&huart2, (uint8_t *)pressed, sizeof(char)*strlen(pressed));
+				   // If the received number is 2 and the button is pressed, the PRESSED message is transmitted
+		   }
+			   }
+	   else if(received_number == '3'){
+		   HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
+		   // If the received number is 3, then print the welcome menu again
 	   }
+   }
 
-    /* USER CODE END WHILE */
+/* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }

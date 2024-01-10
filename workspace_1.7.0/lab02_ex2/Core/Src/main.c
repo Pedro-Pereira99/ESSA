@@ -18,7 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include<stdbool.h>
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -57,15 +57,6 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-GPIO_PinState btn_read = GPIO_PIN_SET;
-bool btn_being_pressed = false;
-uint16_t period = 2000;
-
-void reset_period(){
-	if(period%2 != 0){
-		period = 2000;
-	}
-}
 
 /* USER CODE END 0 */
 
@@ -104,23 +95,21 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  int led_period = 2000; //Period of the LED. If it has a blinking frequency of 0.25 Hz, it has a blinking period of 4s
+  // The period that makes the LED switch states should be half of the blinking period, so it will be 2s on and 2s off.
+
   while (1)
   {
+
+	  if(HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_RESET){ //If the button is pressed
+		  led_period = led_period/2; //Divide period by two multiplies the frequency by 2
+	  }
+
+	  HAL_Delay(led_period); // delay by the time of the led period in milliseconds
+	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin); // Switch the state of the pin
+
     /* USER CODE END WHILE */
-	  HAL_Delay(100);
-	  btn_read = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13);
-	  if(btn_read == GPIO_PIN_RESET ){
-		  if(!btn_being_pressed){
-			  period /= 2;
-			  btn_being_pressed = true;
-		  }
-	  }
-	  else{
-		  btn_being_pressed = false;
-	  }
-	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-	  HAL_Delay(period);
-	  reset_period();
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -225,11 +214,11 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : PC13 */
-  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  /*Configure GPIO pin : B1_Pin */
+  GPIO_InitStruct.Pin = B1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+  HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LD2_Pin */
   GPIO_InitStruct.Pin = LD2_Pin;

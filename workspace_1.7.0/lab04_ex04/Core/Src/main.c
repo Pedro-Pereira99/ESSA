@@ -113,10 +113,10 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  char buffer[40];
+  char buffer[40]; // Helps when transmitting data
 
-  HAL_ADC_Start_IT(&hadc1);
-  HAL_TIM_Base_Start_IT(&htim3);
+  HAL_ADC_Start_IT(&hadc1); // Start the ADC with interrupts enabled
+  HAL_TIM_Base_Start_IT(&htim3); // Start the timer with interrupt enabled
 
   while (1)
   {

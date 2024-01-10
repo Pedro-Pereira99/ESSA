@@ -18,7 +18,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include<stdbool.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -37,8 +36,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-GPIO_PinState btn_read = GPIO_PIN_SET;
-bool btn_being_pressed = false;
+
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -95,20 +93,22 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+  GPIO_PinState previous_read; // This variable is used to store an old  reading of the pushbutton
+  // Which will be compared to a new reading, and allow for the software deboucing
   while (1)
   {
-    /* USER CODE END WHILE */
-	  HAL_Delay(100);
-	  btn_read = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13);
+	  previous_read = HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin); // Store the reading of the push button in this auxiliary variable
 
-	  if(btn_read == GPIO_PIN_RESET ){
-		  if(!btn_being_pressed){
-			  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-			  btn_being_pressed = true;
-		  }
-	  }else{
-		  btn_being_pressed = false;
+	  if(previous_read == GPIO_PIN_RESET ){ // If the push button was pressed
+			 HAL_Delay(100); // wait 100 ms, this value was found by trial and error to work well
+			 if(previous_read == HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin)){ // If the value is still the same, then no bouncing was detected
+				 HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin); // Switch the state of the pin
+			 }
 	  }
+
+    /* USER CODE END WHILE */
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -213,11 +213,11 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : PC13 */
-  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  /*Configure GPIO pin : B1_Pin */
+  GPIO_InitStruct.Pin = B1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+  HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LD2_Pin */
   GPIO_InitStruct.Pin = LD2_Pin;

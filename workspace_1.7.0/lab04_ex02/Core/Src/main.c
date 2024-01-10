@@ -61,19 +61,13 @@ static void MX_TIM2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
 volatile int CaptureCompare_FLAG = 0; // Capture compare flag
-//volatile int  correctlySentData = 0;
 volatile int correctlyReceivedData = 0;
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim){
-	CaptureCompare_FLAG = 1;
+	CaptureCompare_FLAG = 1; // Once there is a Capture Event, this flag is set
 }
-
-
-//void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
-	  // Set Tx flag
-//	  correctlySentData = 1;
-//}
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 	  // Set Rx flag
@@ -116,30 +110,32 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-  int Captured_Value;
+  int Captured_Value; // Will store the most recent value in the CaptureCompare Register.
+
   int r_edge_counter = 0; // This will help to keep track of how many times a rising edge was detected
   int f_edge_counter = 0; // The same, but for falling edges
-  int rising_edge[2];
-  int falling_edge[2];
-  char buffer[40];
-  //char buffer_dc; //
 
-  char received_number;
+  int rising_edge[2]; // Will store the Capture Value of the 2 most recent rising edges
+  int falling_edge[2]; // Will store the Capture Value of the 2 most recent falling edges
+
+  char buffer[40]; // This variable will be used for transmitting data
+
+  char received_number; // Stores the user input
 
   char welcome_message[] = "The code is now running. Type 1 to see the frequency and 2 to see the duty cycle. \n";
 
-  int period;
-  int freq;
-  int duty_cycle;
+  int period; //period, not in seconds, but in 'ticks'
+  int freq; // frequency of the input wave, in Hz
+  int duty_cycle; // Duty cycle of the input wave, in percentage %
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1);
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1); // Starts the counter in Input Capture mode with global interrupts enabled
+  // HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1); // Starts the PWM for input wave
 
-  HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
+  HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message)); // Print welcome message
 
   while (1)
   {
@@ -152,31 +148,31 @@ int main(void)
 		Captured_Value = HAL_TIM_ReadCapturedValue(&htim3, TIM_CHANNEL_1); // Read the captured value
 
 		if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6) == 1){
-			rising_edge[r_edge_counter] = Captured_Value;
-			r_edge_counter++;
+			rising_edge[r_edge_counter] = Captured_Value; // Stores the captured value as a rising edge
+			r_edge_counter++; // Increments the counter of rising edges
 		}
 
 		else{
-			falling_edge[f_edge_counter] = Captured_Value;
-			f_edge_counter++;
+			falling_edge[f_edge_counter] = Captured_Value; // Stores the captured value as a falling edge
+			f_edge_counter++; // Increments the counter of falling edges
 		}
 	}
 
 	if(f_edge_counter > 1 && r_edge_counter > 1){
-		r_edge_counter=0;
+		r_edge_counter=0; // Resets the counter of edges
 		f_edge_counter=0;
 
-		period = rising_edge[1] - rising_edge[0]; // This is the period in ticks
-		// The pre-scaler used was of 2099. Therefore, 1 second = 84.000.000 / (2099 + 1) ticks.
-		// We have then that 1 tick of  the counter = 1/40,000 seconds;
-		// period in seconds = period in ticks /40,000
+		if(rising_edge[1] > rising_edge[0]){ // Fail-safe to prevent error
+			period = rising_edge[1] - rising_edge[0];
+			duty_cycle = 100*abs(rising_edge[0] - falling_edge[0])/period; // duty cycle in percentage
+			// Due to custom configuration of the internal clock and timer
+			// We have then that 1 tick of  the counter = 1/40,000 seconds;
+			// period in seconds = period in ticks /40,000
+		}
 		freq = 40000/period; // frequency in Hz
-		duty_cycle = 100*abs(rising_edge[0] - falling_edge[0])/period;
-
-
  	}
 
-	HAL_UART_Receive_IT(&huart2, &received_number, 1);
+	HAL_UART_Receive_IT(&huart2, &received_number, 1); // Prepare for user input
 
 	// Check RX flag
    if (correctlyReceivedData == 1) {

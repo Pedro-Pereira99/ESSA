@@ -31,21 +31,21 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
  13 .debug_info   00008174  00000000  00000000  0002007f  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_abbrev 00001666  00000000  00000000  000281f3  2**0
+ 14 .debug_abbrev 00001653  00000000  00000000  000281f3  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_aranges 000006c0  00000000  00000000  00029860  2**3
+ 15 .debug_aranges 000006c0  00000000  00000000  00029848  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_rnglists 0000052a  00000000  00000000  00029f20  2**0
+ 16 .debug_rnglists 0000052a  00000000  00000000  00029f08  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_macro  000148d7  00000000  00000000  0002a44a  2**0
+ 17 .debug_macro  000148d7  00000000  00000000  0002a432  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   0000879b  00000000  00000000  0003ed21  2**0
+ 18 .debug_line   0000879b  00000000  00000000  0003ed09  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    00081497  00000000  00000000  000474bc  2**0
+ 19 .debug_str    00081497  00000000  00000000  000474a4  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .debug_frame  00001ab0  00000000  00000000  000c8954  2**2
+ 20 .debug_frame  00001ab0  00000000  00000000  000c893c  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 00000065  00000000  00000000  000ca404  2**0
+ 21 .debug_line_str 00000065  00000000  00000000  000ca3ec  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -459,7 +459,7 @@ int main(void)
  8000550:	3402      	adds	r4, #2
  8000552:	0c0b      	lsrs	r3, r1, #16
  8000554:	7023      	strb	r3, [r4, #0]
-  char received_number;
+  char received_number; // Variable that will store the input data
   char pressed[] = "PRESSED";
  8000556:	4a37      	ldr	r2, [pc, #220]	; (8000634 <main+0x114>)
  8000558:	f107 030c 	add.w	r3, r7, #12
@@ -483,63 +483,62 @@ int main(void)
  8000580:	4619      	mov	r1, r3
  8000582:	482e      	ldr	r0, [pc, #184]	; (800063c <main+0x11c>)
  8000584:	f001 fb24 	bl	8001bd0 <HAL_UART_Transmit_IT>
-  {
-	  // Print welcome message
-	   //HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
 
-	  // Check TX flag
-	   if (correctlySentData == 1) {
+  while (1)
+  {
+  // Check TX flag
+   if (correctlySentData == 1) {
  8000588:	4b2d      	ldr	r3, [pc, #180]	; (8000640 <main+0x120>)
  800058a:	681b      	ldr	r3, [r3, #0]
  800058c:	2b01      	cmp	r3, #1
  800058e:	d102      	bne.n	8000596 <main+0x76>
-	   correctlySentData = 0;
+   correctlySentData = 0;
  8000590:	4b2b      	ldr	r3, [pc, #172]	; (8000640 <main+0x120>)
  8000592:	2200      	movs	r2, #0
  8000594:	601a      	str	r2, [r3, #0]
 
-	   }
+   }
 
-	   // Prepare UART to receive a single character
-	   HAL_UART_Receive_IT(&huart2, &received_number, 1);
+   // Prepare UART to receive a single character
+   HAL_UART_Receive_IT(&huart2, &received_number, 1);
  8000596:	f107 0317 	add.w	r3, r7, #23
  800059a:	2201      	movs	r2, #1
  800059c:	4619      	mov	r1, r3
  800059e:	4827      	ldr	r0, [pc, #156]	; (800063c <main+0x11c>)
  80005a0:	f001 fb4c 	bl	8001c3c <HAL_UART_Receive_IT>
 
-	   	   // Check RX flag
-	   if (correctlyReceivedData == 1) {
+	   // Check RX flag
+   if (correctlyReceivedData == 1) {
  80005a4:	4b27      	ldr	r3, [pc, #156]	; (8000644 <main+0x124>)
  80005a6:	681b      	ldr	r3, [r3, #0]
  80005a8:	2b01      	cmp	r3, #1
  80005aa:	d1ed      	bne.n	8000588 <main+0x68>
-	   correctlyReceivedData = 0;
+   correctlyReceivedData = 0;
  80005ac:	4b25      	ldr	r3, [pc, #148]	; (8000644 <main+0x124>)
  80005ae:	2200      	movs	r2, #0
  80005b0:	601a      	str	r2, [r3, #0]
-	   	   if(received_number == '1'){
+	   if(received_number == '1'){
  80005b2:	7dfb      	ldrb	r3, [r7, #23]
  80005b4:	2b31      	cmp	r3, #49	; 0x31
  80005b6:	d104      	bne.n	80005c2 <main+0xa2>
-	   		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin); //If the received number is 1, then toggle the LED
+		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin); //If the received number is 1, then toggle the LED
  80005b8:	2120      	movs	r1, #32
  80005ba:	4823      	ldr	r0, [pc, #140]	; (8000648 <main+0x128>)
  80005bc:	f000 fe05 	bl	80011ca <HAL_GPIO_TogglePin>
  80005c0:	e7e2      	b.n	8000588 <main+0x68>
-	   	   }
-	   	   else if(received_number == '2'){
+	   }
+	   else if(received_number == '2'){
  80005c2:	7dfb      	ldrb	r3, [r7, #23]
  80005c4:	2b32      	cmp	r3, #50	; 0x32
  80005c6:	d121      	bne.n	800060c <main+0xec>
-	   		   if(HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin)==GPIO_PIN_SET){
+		   if(HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin)==GPIO_PIN_SET){
  80005c8:	f44f 5100 	mov.w	r1, #8192	; 0x2000
  80005cc:	481f      	ldr	r0, [pc, #124]	; (800064c <main+0x12c>)
  80005ce:	f000 fdcb 	bl	8001168 <HAL_GPIO_ReadPin>
  80005d2:	4603      	mov	r3, r0
  80005d4:	2b01      	cmp	r3, #1
  80005d6:	d10b      	bne.n	80005f0 <main+0xd0>
-	   			   HAL_UART_Transmit_IT(&huart2, (uint8_t *)released, sizeof(char)*strlen(released));
+			   HAL_UART_Transmit_IT(&huart2, (uint8_t *)released, sizeof(char)*strlen(released));
  80005d8:	463b      	mov	r3, r7
  80005da:	4618      	mov	r0, r3
  80005dc:	f7ff fdfa 	bl	80001d4 <strlen>
@@ -550,10 +549,10 @@ int main(void)
  80005e8:	4814      	ldr	r0, [pc, #80]	; (800063c <main+0x11c>)
  80005ea:	f001 faf1 	bl	8001bd0 <HAL_UART_Transmit_IT>
  80005ee:	e7cb      	b.n	8000588 <main+0x68>
-	   			   // In case the received number is 2 and the button is released, the code should transmit the RELEASED message
-	   		   }
-	   		   else{
-	   			   HAL_UART_Transmit_IT(&huart2, (uint8_t *)pressed, sizeof(char)*strlen(pressed));
+			   // In case the received number is 2 and the button is released, the code should transmit the RELEASED message
+		   }
+		   else{
+			   HAL_UART_Transmit_IT(&huart2, (uint8_t *)pressed, sizeof(char)*strlen(pressed));
  80005f0:	f107 030c 	add.w	r3, r7, #12
  80005f4:	4618      	mov	r0, r3
  80005f6:	f7ff fded 	bl	80001d4 <strlen>
@@ -564,14 +563,14 @@ int main(void)
  8000604:	480d      	ldr	r0, [pc, #52]	; (800063c <main+0x11c>)
  8000606:	f001 fae3 	bl	8001bd0 <HAL_UART_Transmit_IT>
  800060a:	e7bd      	b.n	8000588 <main+0x68>
-	   			   	   // If the received number is 2 and the button is pressed, the PRESSED message is transmitted
-	   		   }
-	   		   	   }
-	   	   else if(received_number == '3'){
+				   // If the received number is 2 and the button is pressed, the PRESSED message is transmitted
+		   }
+			   }
+	   else if(received_number == '3'){
  800060c:	7dfb      	ldrb	r3, [r7, #23]
  800060e:	2b33      	cmp	r3, #51	; 0x33
  8000610:	d1ba      	bne.n	8000588 <main+0x68>
-	   		   HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
+		   HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
  8000612:	f107 0318 	add.w	r3, r7, #24
  8000616:	4618      	mov	r0, r3
  8000618:	f7ff fddc 	bl	80001d4 <strlen>
@@ -581,7 +580,7 @@ int main(void)
  8000624:	4619      	mov	r1, r3
  8000626:	4805      	ldr	r0, [pc, #20]	; (800063c <main+0x11c>)
  8000628:	f001 fad2 	bl	8001bd0 <HAL_UART_Transmit_IT>
-	   if (correctlySentData == 1) {
+   if (correctlySentData == 1) {
  800062c:	e7ac      	b.n	8000588 <main+0x68>
  800062e:	bf00      	nop
  8000630:	08002ae0 	.word	0x08002ae0

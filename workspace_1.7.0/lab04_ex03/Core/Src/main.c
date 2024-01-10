@@ -117,8 +117,8 @@ int main(void)
   int period;
   int freq;
   int duty_cycle;
-  int max_freq = 0;
-  int min_freq = 999;
+  int max_freq = 0; // variable that records the max frequency
+  int min_freq = 999; // variable that records the min frequency
 
   /* USER CODE END 2 */
 
@@ -177,7 +177,7 @@ int main(void)
 		   HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "The measured frequency is %d Hz \n", freq));
 	   }
 
-	   else if(received_number == '2'){ // Transmit duty cycle
+	   else if(received_number == '2'){ // Transmit du	ty cycle
 		   HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "The measured duty cycle is %d%% \n", duty_cycle));
 		   }
 	   else if(received_number == '3'){ // Transmit maximum frequency
