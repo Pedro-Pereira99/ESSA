@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">&#x0A;<refactoring comment="Delete resource &apos;lab05_ex1/X-CUBE-MEMS1/Target&apos;" deleteContents="false" description="Delete resource &apos;lab05_ex1/X-CUBE-MEMS1/Target&apos;" element1="/lab05_ex1/X-CUBE-MEMS1/Target" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1705068720988"/>&#x0A;<refactoring comment="Delete resource &apos;lab05_ex1/Drivers/BSP/IKS01A3&apos;" deleteContents="false" description="Delete resource &apos;lab05_ex1/Drivers/BSP/IKS01A3&apos;" element1="/lab05_ex1/Drivers/BSP/IKS01A3" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1705068926636"/>
+</session>

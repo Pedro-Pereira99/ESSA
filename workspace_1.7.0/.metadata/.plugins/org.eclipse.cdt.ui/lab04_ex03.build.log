@@ -1,4 +1,4 @@
-15:15:02 **** Incremental Build of configuration Debug for project lab04_ex03 ****
+15:14:48 **** Build of configuration Debug for project lab04_ex03 ****
 make -j8 all 
 arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F401xE -c -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
 ../Core/Src/main.c: In function 'main':
@@ -115,5 +115,5 @@ Finished building: default.size.stdout
 Finished building: lab04_ex03.list
  
 
-15:15:03 Build Finished. 0 errors, 13 warnings. (took 1s.542ms)
+15:14:49 Build Finished. 0 errors, 13 warnings. (took 1s.133ms)
 

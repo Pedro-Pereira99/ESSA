@@ -29,7 +29,7 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
- ../Drivers/BSP/IKS01A3/iks01a3_motion_sensors.h\  \
+ ../Drivers/BSP/IKS01A3/iks01a3_motion_sensors.h \
  ../X-CUBE-MEMS1/Target/iks01a3_conf.h ../Core/Inc/stm32f4xx_nucleo_bus.h \
  ../Core/Inc/stm32f4xx_nucleo_conf.h ../Core/Inc/stm32f4xx_nucleo_errno.h \
  ../Core/Inc/stm32f4xx_nucleo_errno.h \
@@ -71,7 +71,7 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
-../Drivers/BSP/IKS01A3/iks01a3_motion_sensors.h\ :
+../Drivers/BSP/IKS01A3/iks01a3_motion_sensors.h:
 ../X-CUBE-MEMS1/Target/iks01a3_conf.h:
 ../Core/Inc/stm32f4xx_nucleo_bus.h:
 ../Core/Inc/stm32f4xx_nucleo_conf.h:

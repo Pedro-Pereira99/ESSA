@@ -524,10 +524,10 @@ int main(void)
   int period;
   int freq;
   int duty_cycle;
-  int max_freq = 0;
+  int max_freq = 0; // variable that records the max frequency
  8000600:	2300      	movs	r3, #0
  8000602:	f8c7 30b8 	str.w	r3, [r7, #184]	; 0xb8
-  int min_freq = 999;
+  int min_freq = 999; // variable that records the min frequency
  8000606:	f240 33e7 	movw	r3, #999	; 0x3e7
  800060a:	f8c7 30b4 	str.w	r3, [r7, #180]	; 0xb4
 
@@ -709,7 +709,7 @@ int main(void)
  8000766:	e761      	b.n	800062c <main+0x60>
 	   }
 
-	   else if(received_number == '2'){ // Transmit duty cycle
+	   else if(received_number == '2'){ // Transmit du	ty cycle
  8000768:	f897 3077 	ldrb.w	r3, [r7, #119]	; 0x77
  800076c:	2b32      	cmp	r3, #50	; 0x32
  800076e:	d110      	bne.n	8000792 <main+0x1c6>

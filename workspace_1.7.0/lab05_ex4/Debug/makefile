@@ -68,7 +68,7 @@ main-build: lab05_ex4.elf secondary-outputs
 
 # Tool invocations
 lab05_ex4.elf lab05_ex4.map: $(OBJS) $(USER_OBJS) C:\Users\morae\STM32CubeIDE\workspace_1.7.0\lab05_ex4\STM32F401RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "lab05_ex4.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\morae\STM32CubeIDE\workspace_1.7.0\lab05_ex4\STM32F401RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="lab05_ex4.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "lab05_ex4.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\morae\STM32CubeIDE\workspace_1.7.0\lab05_ex4\STM32F401RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="lab05_ex4.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

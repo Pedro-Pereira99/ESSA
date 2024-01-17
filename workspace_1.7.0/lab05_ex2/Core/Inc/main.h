@@ -31,7 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "iks01a3_env_sensors.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

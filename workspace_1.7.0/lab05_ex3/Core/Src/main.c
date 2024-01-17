@@ -21,7 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "iks01a3_motion_sensors.h "
+#include "iks01a3_motion_sensors.h"
+#include "iks01a3_conf.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -40,7 +41,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim3;
 
 UART_HandleTypeDef huart2;
 
@@ -52,7 +53,7 @@ UART_HandleTypeDef huart2;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
-static void MX_TIM2_Init(void);
+static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -64,6 +65,7 @@ volatile int tim2Flag = 0; //Create a flag for the timer
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	tim2Flag = 1; // The interrupt func is going to set the flag every 500 ms
 } // The flag will be cleared in the while loop.
+
 
 /* USER CODE END 0 */
 
@@ -96,7 +98,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
-  MX_TIM2_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -104,35 +106,36 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  char welcome_message = "the code is now running \r\n"; // Used just to be helpful during debugging
-
-  IKS01A3_MOTION_SENSOR_Init(IKS01A3_LIS2DW12_0, MOTION_ACCELERO); // Initialize the accelerometer sensor
-
-  IKS01A3_MOTION_SENSOR_Enable(IKS01A3_LIS2DW12_0, MOTION_ACCELERO); // Enable the acc sensor
-
-  int32_t acc_axes[3]; //Array to save the data of acceleration measured in each axis of space (X Y and Z);
+  char welcome_message[] = "Exercise 3 has started \r\n"; // Message to transmit in case of any error when reading the data
 
   int index = 0;
+  int index_to_print;
   int unfiltered_x[5] = {0};
   int unfiltered_y[5] = {0};
   int unfiltered_z[5] = {0};
 
   int filtered_xyz[3] = {0};
 
+  IKS01A3_MOTION_SENSOR_Init(IKS01A3_LIS2DW12_0, MOTION_ACCELERO); // Initialize the accelerometer sensor
+  IKS01A3_MOTION_SENSOR_Enable(IKS01A3_LIS2DW12_0, MOTION_ACCELERO); // Enable the acc sensor
 
-  char buffer[40]; // This will help the data transmission
+  HAL_TIM_Base_Start_IT(&htim3);// Start the timer; This will enable interrupts every time the timer is reloaded (every 0.5 sec)
 
-  HAL_TIM_Base_Start_IT(&htim2);// Start the timer; This will enable interrupts every time the timer is reloaded (every 10 milisec)
+  IKS01A3_MOTION_SENSOR_Axes_t acc_axes; // Struct to save the data of acceleration measured in each axis of space (X Y and Z);
+
+
+  char buffer_acc[40]; // This will help the data transmission
+
   // Print welcome message
   HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
+
+
   while (1)
   {
-// This time, the code does not check the status of the reading of the sensor, just to simplify;
 
 	 if(tim2Flag == 1){
 		  tim2Flag = 0; //Clear the interrupt flag of the timer
-		  IKS01A3_MOTION_SENSOR_GetAxes(IKS01A3_LIS2DW12_0, MOTION_ACCELERO, acc_axes); // This function will save the data in the array gyro_axes,	 }
-
+		  IKS01A3_MOTION_SENSOR_GetAxes(IKS01A3_LIS2DW12_0, MOTION_ACCELERO, &acc_axes); // This function will save the data in the array acc_axes, and return a value that can be useful to finding errors;
 
 		  ///// FILTER IMPLEMENTATION
 
@@ -142,19 +145,19 @@ int main(void)
 		  // It is important to note that the first two outputs transmitted should be discarded.
 		  // Explanation: if we think of Y[i] as the filtered output for any axis, with i starting from zero,
 		  // the first two transmission of Y will correspond to Y[-2] and Y[-1]. The third transmission will correspond to the actual first filtered value Y[0]
-		  // Which would be given by Y[0] = ( X[-1] + X[-2] + X[0] + X[1] + X[2])/5 = ( 0 + 0 + X[0] + X[1] + X[2])/5
+		  // Which would be given by Y[0] = ( X[-2] + X[-1] + X[0] + X[1] + X[2])/5 = ( 0 + 0 + X[0] + X[1] + X[2])/5
 		  // where X[i] is the unfiltered output for the same axis.
 
 
- 		  filtered_xyz[0] -= unfiltered_x[index]/5;
-		  filtered_xyz[0] -= unfiltered_y[index]/5;
-		  filtered_xyz[0] -= unfiltered_z[index]/5;
+		  filtered_xyz[0] -= unfiltered_x[index]/5;
+		  filtered_xyz[1] -= unfiltered_y[index]/5;
+		  filtered_xyz[2] -= unfiltered_z[index]/5;
 		  // With this, the oldest sample is discarded from the calculation of Y[i]
 		  // Before the first loop of the  circular buffer, the value subtracted will be zero
 
-		  unfiltered_x[index] = acc_axes[0];
-		  unfiltered_y[index] = acc_axes[1];
-		  unfiltered_z[index] = acc_axes[2];
+		  unfiltered_x[index] = acc_axes.x;
+		  unfiltered_y[index] = acc_axes.y;
+		  unfiltered_z[index] = acc_axes.z;
 		  // The new sample is stored in place of the discarded sample
 
 		  filtered_xyz[0] += unfiltered_x[index]/5;
@@ -163,27 +166,19 @@ int main(void)
 		  // The new sample is used to calculate the filtered output
 
 		  index = (index+1) % 5; //Moves the index for the circular buffer forward. It will go from 0 to 4
+		  index_to_print = (index+2)%5;
 
 		  // Although this implementation of the filter is fairly simple, it is easy to misinterpret the data transmitted in a way that would generate a shift between the input and the output.
 
-		  ////////////
-		  // Transmit data before filtering
-		  HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "Input acc data: %d ", acc_axes[0])); // Transmits acceleration in the X axis
-		  HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "%d ", acc_axes[1])); // Transmits acceleration in the Y axis
-		  HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "%d \r\n", acc_axes[2])); // Transmits acceleration in the Z axis
 
-		  // Transmit data after filtering
-		  HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "Filtered acc data: %d ", filtered_xyz[0])); // Transmits acceleration in the X axis
-		  HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "%d ", filtered_xyz[1])); // Transmits acceleration in the Y axis
-		  HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "%d \r\n", filtered_xyz[2])); // Transmits acceleration in the Z axis
+		  HAL_UART_Transmit_IT(&huart2, buffer_acc, sprintf(buffer_acc, " %d, %d, %d, %d, %d, %d; \r\n ",
+				  	  	  	  filtered_xyz[0],  filtered_xyz[1],  filtered_xyz[2],
+							  unfiltered_x[index_to_print], unfiltered_y[index_to_print], unfiltered_z[index_to_print])); // Transmits data
 
-		  // What I expect to see in the Serial Monitor is two lines each 10 ms:
-		  // Input acc data: x0 y0 z0
-		  // Filtered acc data: xf yf zf
-		  // Sadly, I cannot test it until the day of the laboratory. It is very possible that there is a better way to transmit this data (maybe just one or two lines of code)
+		  //First three columns are the filtered data, last three are unfiltered
+
+
 	 }
-
-
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -238,47 +233,47 @@ void SystemClock_Config(void)
 }
 
 /**
-  * @brief TIM2 Initialization Function
+  * @brief TIM3 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_TIM2_Init(void)
+static void MX_TIM3_Init(void)
 {
 
-  /* USER CODE BEGIN TIM2_Init 0 */
+  /* USER CODE BEGIN TIM3_Init 0 */
 
-  /* USER CODE END TIM2_Init 0 */
+  /* USER CODE END TIM3_Init 0 */
 
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
 
-  /* USER CODE BEGIN TIM2_Init 1 */
+  /* USER CODE BEGIN TIM3_Init 1 */
 
-  /* USER CODE END TIM2_Init 1 */
-  htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 0;
-  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 839999;
-  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 2099;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 19999;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
   {
     Error_Handler();
   }
   sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
   {
     Error_Handler();
   }
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN TIM2_Init 2 */
+  /* USER CODE BEGIN TIM3_Init 2 */
 
-  /* USER CODE END TIM2_Init 2 */
+  /* USER CODE END TIM3_Init 2 */
 
 }
 

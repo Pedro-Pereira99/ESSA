@@ -500,12 +500,12 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  char buffer[40];
+  char buffer[40]; // Helps when transmitting data
 
-  HAL_ADC_Start_IT(&hadc1);
+  HAL_ADC_Start_IT(&hadc1); // Start the ADC with interrupts enabled
  80005e2:	480e      	ldr	r0, [pc, #56]	; (800061c <main+0x58>)
  80005e4:	f000 fc54 	bl	8000e90 <HAL_ADC_Start_IT>
-  HAL_TIM_Base_Start_IT(&htim3);
+  HAL_TIM_Base_Start_IT(&htim3); // Start the timer with interrupt enabled
  80005e8:	480d      	ldr	r0, [pc, #52]	; (8000620 <main+0x5c>)
  80005ea:	f002 f893 	bl	8002714 <HAL_TIM_Base_Start_IT>
 

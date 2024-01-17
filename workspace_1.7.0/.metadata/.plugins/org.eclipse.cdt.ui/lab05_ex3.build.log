@@ -1,7 +1,10 @@
-11:12:36 **** Incremental Build of configuration Debug for project lab05_ex3 ****
+20:14:00 **** Incremental Build of configuration Debug for project lab05_ex3 ****
 make -j8 all 
-make: *** No rule to make target '../Drivers/BSP/IKS01A3/iks01a3_motion_sensors.h ../X-CUBE-MEMS1/Target/iks01a3_conf.h', needed by 'Core/Src/main.o'.  Stop.
-"make -j8 all" terminated with exit code 2. Build might be incomplete.
+arm-none-eabi-size  lab05_ex3.elf 
+   text	   data	    bss	    dec	    hex	filename
+  41164	    312	   2376	  43852	   ab4c	lab05_ex3.elf
+Finished building: default.size.stdout
+ 
 
-11:12:36 Build Failed. 1 errors, 0 warnings. (took 315ms)
+20:14:00 Build Finished. 0 errors, 0 warnings. (took 588ms)
 

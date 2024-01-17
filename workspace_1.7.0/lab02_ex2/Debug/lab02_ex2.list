@@ -29,23 +29,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
  12 .comment      00000043  00000000  00000000  0002003c  2**0
                   CONTENTS, READONLY
- 13 .debug_info   00007079  00000000  00000000  0002007f  2**0
+ 13 .debug_info   00007074  00000000  00000000  0002007f  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_abbrev 000012d4  00000000  00000000  000270f8  2**0
+ 14 .debug_abbrev 000012d4  00000000  00000000  000270f3  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_aranges 00000618  00000000  00000000  000283d0  2**3
+ 15 .debug_aranges 00000618  00000000  00000000  000283c8  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_rnglists 000004a7  00000000  00000000  000289e8  2**0
+ 16 .debug_rnglists 000004a7  00000000  00000000  000289e0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_macro  00014717  00000000  00000000  00028e8f  2**0
+ 17 .debug_macro  00014717  00000000  00000000  00028e87  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   000077a2  00000000  00000000  0003d5a6  2**0
+ 18 .debug_line   0000779d  00000000  00000000  0003d59e  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    0008114d  00000000  00000000  00044d48  2**0
+ 19 .debug_str    0008114d  00000000  00000000  00044d3b  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .debug_frame  000017f0  00000000  00000000  000c5e98  2**2
+ 20 .debug_frame  000017f0  00000000  00000000  000c5e88  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 00000064  00000000  00000000  000c7688  2**0
+ 21 .debug_line_str 00000064  00000000  00000000  000c7678  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -389,7 +389,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  volatile int led_period = 2000; //Period of the LED. If it has a blinking frequency of 0.25 Hz, it has a blinking period of 4s
+  int led_period = 2000; //Period of the LED. If it has a blinking frequency of 0.25 Hz, it has a blinking period of 4s
  80004e6:	f44f 63fa 	mov.w	r3, #2000	; 0x7d0
  80004ea:	607b      	str	r3, [r7, #4]
   // The period that makes the LED switch states should be half of the blinking period, so it will be 2s on and 2s off.

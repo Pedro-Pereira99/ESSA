@@ -21,7 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "iks01a3_motion_sensors.h "
+#include "iks01a3_motion_sensors.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -40,7 +41,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim3;
 
 UART_HandleTypeDef huart2;
 
@@ -52,7 +53,7 @@ UART_HandleTypeDef huart2;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
-static void MX_TIM2_Init(void);
+static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -64,6 +65,7 @@ volatile int tim2Flag = 0; //Create a flag for the timer
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	tim2Flag = 1; // The interrupt func is going to set the flag every 500 ms
 } // The flag will be cleared in the while loop.
+
 
 /* USER CODE END 0 */
 
@@ -96,7 +98,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
-  MX_TIM2_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -104,77 +106,77 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  char welcome_message = "the code is now running \r\n"; // Used just to be helpful during debugging
+  char welcome_message[] = "Exercise 4 has started \r\n"; // Message to transmit in case of any error when reading the data
 
   IKS01A3_MOTION_SENSOR_Init(IKS01A3_LIS2DW12_0, MOTION_ACCELERO); // Initialize the accelerometer sensor
-
   IKS01A3_MOTION_SENSOR_Enable(IKS01A3_LIS2DW12_0, MOTION_ACCELERO); // Enable the acc sensor
-
-  int32_t acc_axes[3]; //Array to save the data of acceleration measured in each axis of space (X Y and Z);
+  IKS01A3_MOTION_SENSOR_Axes_t acc_axes; // Struct to save the data of acceleration measured in each axis of space (X Y and Z);
 
   /////// Variables for 5 coef M.A.F.
-  int index_5coef = 0;
-  int aux0 = 0;
-  int unfiltered_x[5] = {0};
-  int unfiltered_y[5] = {0};
-  int unfiltered_z[5] = {0};
-  int filtered_xyz[3] = {0};
-//////////////
+    int index_5coef = 0;
 
-  // Variables for 50 coef Moving Average Filter
-  int buffer_x[50] = {0};
-  int buffer_y[50] = {0};
-  int buffer_z[50] = {0};
+    int unfiltered_x[5] = {0};
+    int unfiltered_y[5] = {0};
+    int unfiltered_z[5] = {0};
+    int filtered_xyz[3] = {0};
+  //////////////
 
-  int index_50coef = 0;
+    // Variables for 50 coef Moving Average Filter
+    int buffer_x[50] = {0};
+    int buffer_y[50] = {0};
+    int buffer_z[50] = {0};
 
-  int sum50_x = 0;
-  int sum50_y = 0;
-  int sum50_z = 0;
+    int index_50coef = 0;
 
-  int aux50;
+    int sum50_x = 0;
+    int sum50_y = 0;
+    int sum50_z = 0;
 
-  int filter50_x;
-  int filter50_y;
-  int filter50_z;
-  ///////////////////
+    int aux50 = 0;
 
-  // IRR FILTER COEFFICIENTS
-  int beta = 0.35; // Picked this value at random, just to implement the code
-  // Need to change into something that makes sense
-  int alfa = 1 - beta;
-  int IRR_xyz[3] = {0}; // In this variable I will store the filtered output for IRR in the axes x y and z
-//////////////////////
+    int filter50_x;
+    int filter50_y;
+    int filter50_z;
+    ///////////////////
 
-  char buffer[40]; // This will help the data transmission
+    // IRR FILTER COEFFICIENTS
+    float fc = 0.1/100 * 2; // The sampling frequency is 2 Hz
+    float beta = exp(-2*3.1416*fc); // the value of beta is equal to x, which is defined by this formula
+    float alfa = 1 - beta;
+    float IRR_xyz[3] = {0}; // In this variable I will store the filtered output for IRR in the axes x y and z
+    //////////////////////
 
-  HAL_TIM_Base_Start_IT(&htim2);// Start the timer; This will enable interrupts every time the timer is reloaded (every 10 milisec)
+
+
+
+  HAL_TIM_Base_Start_IT(&htim3);// Start the timer; This will enable interrupts every time the timer is reloaded (every 0.5 sec)
+  char buffer_acc[40]; // This will help the data transmission
+
   // Print welcome message
   HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
+
   while (1)
   {
-// This time, the code does not check the status of the reading of the sensor, just to simplify;
 
 	 if(tim2Flag == 1){
-		  timFlag = 0; //Clear the interrupt flag of the timer
-		  IKS01A3_MOTION_SENSOR_GetAxes(IKS01A3_LIS2DW12_0, MOTION_ACCELERO, acc_axes); // This function will save the data in the array gyro_axes,	 }
-
+		  tim2Flag = 0; //Clear the interrupt flag of the timer
+		  IKS01A3_MOTION_SENSOR_GetAxes(IKS01A3_LIS2DW12_0, MOTION_ACCELERO, &acc_axes); // This function will save the data in the array acc_axes, and return a value that can be useful to finding errors;
+		  __HAL_DBGMCU_FREEZE_TIM3(); //Freezes the timer for debugging
 
 		  ///// 5 COEFFICIENT M.A. FILTER IMPLEMENTATION
-
 		  //// In this implementation of the MA filter the output is stored in the variable "filtered_xyz";
 		  /// The output will be transmitted, and in the next iteration of the loop, it will be overwritten
 
 
 		  filtered_xyz[0] -= unfiltered_x[index_5coef]/5;
-		  filtered_xyz[0] -= unfiltered_y[index_5coef]/5;
-		  filtered_xyz[0] -= unfiltered_z[index_5coef]/5;
+		  filtered_xyz[1] -= unfiltered_y[index_5coef]/5;
+		  filtered_xyz[2] -= unfiltered_z[index_5coef]/5;
 		  // With this, the oldest sample is discarded from the calculation of Y[i]
 		  // Before the first loop of the  circular buffer, the value subtracted will be zero
 
-		  unfiltered_x[index_5coef] = acc_axes[0];
-		  unfiltered_y[index_5coef] = acc_axes[1];
-		  unfiltered_z[index_5coef] = acc_axes[2];
+		  unfiltered_x[index_5coef] = acc_axes.x;
+		  unfiltered_y[index_5coef] = acc_axes.y;
+		  unfiltered_z[index_5coef] = acc_axes.z;
 		  // The new sample is stored in place of the discarded sample
 
 		  filtered_xyz[0] += unfiltered_x[index_5coef]/5;
@@ -185,66 +187,49 @@ int main(void)
 		  index_5coef = (index_5coef+1) % 5; //Moves the index for the circular buffer forward. It will go from 0 to 4
 
 		  ////////////  IRR FILTER IMPLEMENTATION
-		  for(int i=0; i<3; i++){
-			  IRR_xyz[i] = alfa*acc_axes[i] + beta*IRR_xyz[i];
-		  }
+
+		  IRR_xyz[0] = alfa*acc_axes.x + beta*IRR_xyz[0];
+		  IRR_xyz[1] = alfa*acc_axes.y + beta*IRR_xyz[1];
+		  IRR_xyz[2] = alfa*acc_axes.z + beta*IRR_xyz[2];
+
 		  //////////// Moving Average Filter with 50 coefficients
 
 		  sum50_x -= buffer_x[index_50coef];
 		  sum50_y -= buffer_y[index_50coef];
 		  sum50_z -= buffer_z[index_50coef];
 
-		  buffer_x[index_50coef] = acc_axes[0];
-		  buffer_y[index_50coef] = acc_axes[1];
-		  buffer_z[index_50coef] = acc_axes[2];
+		  buffer_x[index_50coef] = acc_axes.x;
+		  buffer_y[index_50coef] = acc_axes.y;
+		  buffer_z[index_50coef] = acc_axes.z;
 
 		  sum50_x += buffer_x[index_50coef];
 		  sum50_y += buffer_y[index_50coef];
 		  sum50_z += buffer_z[index_50coef];
 
 		  if(aux50 == 1 || index_50coef == 49){  // This conditional will prevent shifts. With this, the first filtered value to be transmitted will be Y[0]
-			 aux50 = 1;
+
+			  aux50 = 1;
 			 // Since this code will only work with integers, this work-around was created to avoid dividing each sample by 50 - this could cause the samples to be lost
 			 // With this, the code only performs the division by 50 once fifty samples have been summed
 			 filter50_x = sum50_x / 50;
 			 filter50_y = sum50_y / 50;
 			 filter50_z = sum50_z / 50;
 
-			 // Transmit data after filtering (50 COEF MAF)
-			  HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "50 coef filter data: %d ", filter50_x)); // Transmits acceleration in the X axis
-			  HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "%d ", filter50_y)); // Transmits acceleration in the Y axis
-			  HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "%d \r\n", filter50_z)); // Transmits acceleration in the Z axis
+
+			  HAL_UART_Transmit_IT(&huart2, buffer_acc, sprintf(buffer_acc, " %d, %d, %d,   %d, %d, %d,   %f, %f, %f; \r\n ",
+					  	  	  	  filtered_xyz[0], filtered_xyz[1], filtered_xyz[2],
+								  filter50_x, filter50_y, filter50_z,
+								  IRR_xyz[0], IRR_xyz[1], IRR_xyz[2])); // Transmits the data
+
 
 		  }
 
 		  index_50coef = (index_50coef+1) % 50;
 
 
-		  ////////
-
-
-		  // Transmit data before filtering
-		  HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "Input acc data: %d ", acc_axes[0])); // Transmits acceleration in the X axis
-		  HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "%d ", acc_axes[1])); // Transmits acceleration in the Y axis
-		  HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "%d \r\n", acc_axes[2])); // Transmits acceleration in the Z axis
-
-		  if(aux0 == 1 || index_5coef > 2){  // This conditional will prevent shifts. With this, the first filtered value to be transmitted will be Y[0]
-			  aux0 = 1;
-			  // Transmit data after filtering (5coef MAF)
-			  HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "5 coef filter data: %d ", filtered_xyz[0])); // Transmits acceleration in the X axis
-			  HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "%d ", filtered_xyz[1])); // Transmits acceleration in the Y axis
-			  HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "%d \r\n", filtered_xyz[2])); // Transmits acceleration in the Z axis
-		  }
-
-		  //Transmit data after filtering (5coef MAF)
-		  HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "IRR filter data: %d ", IRR_xyz[0])); // Transmits acceleration in the X axis
-		  HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "%d ", IRR_xyz[1])); // Transmits acceleration in the Y axis
-		  HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "%d \r\n", IRR_xyz[2])); // Transmits acceleration in the Z axis
 
 	 }
-
-
-	  /* USER CODE END WHILE */
+    /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
@@ -298,47 +283,47 @@ void SystemClock_Config(void)
 }
 
 /**
-  * @brief TIM2 Initialization Function
+  * @brief TIM3 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_TIM2_Init(void)
+static void MX_TIM3_Init(void)
 {
 
-  /* USER CODE BEGIN TIM2_Init 0 */
+  /* USER CODE BEGIN TIM3_Init 0 */
 
-  /* USER CODE END TIM2_Init 0 */
+  /* USER CODE END TIM3_Init 0 */
 
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
 
-  /* USER CODE BEGIN TIM2_Init 1 */
+  /* USER CODE BEGIN TIM3_Init 1 */
 
-  /* USER CODE END TIM2_Init 1 */
-  htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 0;
-  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 839999;
-  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 2099;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 19999;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
   {
     Error_Handler();
   }
   sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
   {
     Error_Handler();
   }
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN TIM2_Init 2 */
+  /* USER CODE BEGIN TIM3_Init 2 */
 
-  /* USER CODE END TIM2_Init 2 */
+  /* USER CODE END TIM3_Init 2 */
 
 }
 

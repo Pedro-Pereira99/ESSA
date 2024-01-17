@@ -1,43 +1,10 @@
-18:03:26 **** Incremental Build of configuration Debug for project lab04_ex04 ****
+22:58:19 **** Incremental Build of configuration Debug for project lab04_ex04 ****
 make -j8 all 
-arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F401xE -c -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
-arm-none-eabi-gcc "../Core/Src/stm32f4xx_hal_msp.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F401xE -c -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/stm32f4xx_hal_msp.d" -MT"Core/Src/stm32f4xx_hal_msp.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/stm32f4xx_hal_msp.o"
-arm-none-eabi-gcc "../Core/Src/stm32f4xx_it.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F401xE -c -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/stm32f4xx_it.d" -MT"Core/Src/stm32f4xx_it.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/stm32f4xx_it.o"
-../Core/Src/main.c: In function 'main':
-../Core/Src/main.c:125:55: warning: implicit declaration of function 'sprintf' [-Wimplicit-function-declaration]
-  125 |                 HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "Converted value: %d \n", convertedValue));
-      |                                                       ^~~~~~~
-../Core/Src/main.c:21:1: note: include '<stdio.h>' or provide a declaration of 'sprintf'
-   20 | #include "main.h"
-  +++ |+#include <stdio.h>
-   21 | 
-../Core/Src/main.c:125:55: warning: incompatible implicit declaration of built-in function 'sprintf' [-Wbuiltin-declaration-mismatch]
-  125 |                 HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "Converted value: %d \n", convertedValue));
-      |                                                       ^~~~~~~
-../Core/Src/main.c:125:55: note: include '<stdio.h>' or provide a declaration of 'sprintf'
-../Core/Src/main.c:125:47: warning: pointer targets in passing argument 2 of 'HAL_UART_Transmit_IT' differ in signedness [-Wpointer-sign]
-  125 |                 HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "Converted value: %d \n", convertedValue));
-      |                                               ^~~~~~
-      |                                               |
-      |                                               char *
-In file included from ../Core/Inc/stm32f4xx_hal_conf.h:411,
-                 from ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:29,
-                 from ../Core/Inc/main.h:30,
-                 from ../Core/Src/main.c:20:
-../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:747:82: note: expected 'const uint8_t *' {aka 'const unsigned char *'} but argument is of type 'char *'
-  747 | HAL_StatusTypeDef HAL_UART_Transmit_IT(UART_HandleTypeDef *huart, const uint8_t *pData, uint16_t Size);
-      |                                                                   ~~~~~~~~~~~~~~~^~~~~
-arm-none-eabi-gcc -o "lab04_ex04.elf" @"objects.list"   -mcpu=cortex-m4 -T"C:\Users\morae\STM32CubeIDE\workspace_1.7.0\lab04_ex04\STM32F401RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="lab04_ex04.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
-Finished building target: lab04_ex04.elf
- 
 arm-none-eabi-size  lab04_ex04.elf 
-arm-none-eabi-objdump -h -S lab04_ex04.elf  > "lab04_ex04.list"
    text	   data	    bss	    dec	    hex	filename
   19412	    100	   2124	  21636	   5484	lab04_ex04.elf
 Finished building: default.size.stdout
  
-Finished building: lab04_ex04.list
- 
 
-18:03:28 Build Finished. 0 errors, 3 warnings. (took 1s.583ms)
+22:58:20 Build Finished. 0 errors, 0 warnings. (took 377ms)
 

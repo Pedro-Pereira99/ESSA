@@ -21,7 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "iks01a3_motion_sensors.h "
+#include "iks01a3_env_sensors.h"
+#include "iks01a3_conf.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -40,7 +41,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim3;
 
 UART_HandleTypeDef huart2;
 
@@ -52,7 +53,7 @@ UART_HandleTypeDef huart2;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
-static void MX_TIM2_Init(void);
+static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -64,6 +65,7 @@ volatile int tim2Flag = 0; //Create a flag for the timer
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	tim2Flag = 1; // The interrupt func is going to set the flag every 500 ms
 } // The flag will be cleared in the while loop.
+
 
 /* USER CODE END 0 */
 
@@ -96,7 +98,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
-  MX_TIM2_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -104,66 +106,36 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-	char welcome_message = "the code is now running \r\n"; // Used just to be helpful during debugging
-	int32_t status_temperature; // Variable to check that there was no error when collecting data from temperature sensor
-	int32_t status_humidity; // Variable to check that there was no error when collecting data from humidity sensor
-	int32_t status_pressure; // Variable to check that there was no error when collecting data from pressure sensor
+  IKS01A3_ENV_SENSOR_Init(IKS01A3_HTS221_0, ENV_HUMIDITY); // Initialize the humidity sensor
+  IKS01A3_ENV_SENSOR_Init(IKS01A3_STTS751_0, ENV_TEMPERATURE); // Initialize the temperature sensor
+  IKS01A3_ENV_SENSOR_Init(IKS01A3_LPS22HH_0, ENV_PRESSURE); // Initialize the pressure sensor
 
-	char error_message = "ERROR READING DATA \r\n"; // Message to transmit in case of any error when reading the data
+  IKS01A3_ENV_SENSOR_Enable(IKS01A3_HTS221_0, ENV_HUMIDITY); // Enable the humidity sensor
+  IKS01A3_ENV_SENSOR_Enable(IKS01A3_STTS751_0, ENV_TEMPERATURE); // Enable the temperature sensor
+  IKS01A3_ENV_SENSOR_Enable(IKS01A3_LPS22HH_0, ENV_PRESSURE); // Enable the pressure sensor
 
-	IKS01A3_ENV_SENSOR_Init(IKS01A3_HTS221_0, ENV_HUMIDITY); // Initialize the humidity sensor
-	IKS01A3_ENV_SENSOR_Init(IKS01A3_STTS751_0, ENV_TEMPERATURE); // Initialize the temperature sensor
-	IKS01A3_ENV_SENSOR_Init(IKS01A3_LPS22HH_0, ENV_PRESSURE); // Initialize the pressure sensor
+  	// These three floats are going to store the output data of each sensor,
+  float temperature;
+  float humidity;
+  float pressure;
+  	//
 
-	IKS01A3_ENV_SENSOR_Enable(IKS01A3_HTS221_0, ENV_HUMIDITY); // Enable the humidity sensor
-	IKS01A3_ENV_SENSOR_Enable(IKS01A3_STTS751_0, ENV_TEMPERATURE); // Enable the temperature sensor
-	IKS01A3_ENV_SENSOR_Enable(IKS01A3_LPS22HH_0, ENV_PRESSURE); // Enable the pressure sensor
+  char buffer[50]; // This will help the data transmission
 
-	// These three floats are going to store the output data of each sensor,
-	float temperature;
-	float humidity;
-	float pressure;
-	//
+ 	HAL_TIM_Base_Start_IT(&htim3);// Start the timer; This will enable interrupts every time the timer is reloaded (every 0.5 sec)
 
-	char buffer[40]; // This will help the data transmission
-
-	// Print welcome message
-	HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
-	HAL_TIM_Base_Start_IT(&htim2);// Start the timer; This will enable interrupts every time the timer is reloaded (every 0.5 sec)
-
-  while (1)
-  {
+	while (1)
+	{
 	 if(tim2Flag == 1){
-	  timFlag = 0; //Clear the interrupt flag of the timer
-	  status_humidity = IKS01A3_ENV_SENSOR_GetValue(IKS01A3_HTS221_0, ENV_HUMIDITY, &humidty); // Saves the output in the "humidity" variable, and returns a value useful to find errors
-	  status_temperature = IKS01A3_ENV_SENSOR_GetValue(IKS01A3_STTS751_0, ENV_TEMPERATURE, &temperature); // Saves the output in the "temperature" variable, and returns a value useful to find errors
-	  status_pressure = IKS01A3_ENV_SENSOR_GetValue(IKS01A3_LPS22HH_0, ENV_PRESSURE, &pressure); // Saves the output in the "pressure" variable, and returns a value useful to find errors
+	  tim2Flag = 0; //Clear the interrupt flag of the timer
 
-	  if(status_humidity == BSP_ERROR_NONE){ // If no error is detected when reading the data
+	  IKS01A3_ENV_SENSOR_GetValue(IKS01A3_HTS221_0, ENV_HUMIDITY, &humidity); // Saves the output in the "humidity" variable, and returns a value useful to find errors
+	  IKS01A3_ENV_SENSOR_GetValue(IKS01A3_STTS751_0, ENV_TEMPERATURE, &temperature); // Saves the output in the "temperature" variable, and returns a value useful to find errors
+	  IKS01A3_ENV_SENSOR_GetValue(IKS01A3_LPS22HH_0, ENV_PRESSURE, &pressure); // Saves the output in the "pressure" variable, and returns a value useful to find errors
 
-		  HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "Humidity: %d \r\n", humidity)); // Transmits humidity data
-	  }
-	  else{
-		  HAL_UART_Transmit_IT(&huart2, (uint8_t *)error_message, sizeof(char)*strlen(error_message)); // Transmit the error message;
-	  }
-/////////////////
-	  if(status_temperature == BSP_ERROR_NONE){ // If no error is detected when reading the data
-
-		  HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "Temperature: %d ºC \r\n", temperature)); // Transmits temperature data
-	  }
-	  else{
-		  HAL_UART_Transmit_IT(&huart2, (uint8_t *)error_message, sizeof(char)*strlen(error_message)); // Transmit the error message;
-	  }
-////////////////
-	  if(status_temperature == BSP_ERROR_NONE){ // If no error is detected when reading the data
-
-		  HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "Pressure: %d \r\n", pressure)); // Transmits temperature data
-	  }
-	  else{
-		  HAL_UART_Transmit_IT(&huart2, (uint8_t *)error_message, sizeof(char)*strlen(error_message)); // Transmit the error message;
-	  }
+	  HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "%f, %f, %f; \r\n", temperature, humidity, pressure)); // Transmits humidity data
 	 }
-    /* USER CODE END WHILE */
+	  /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
@@ -217,47 +189,47 @@ void SystemClock_Config(void)
 }
 
 /**
-  * @brief TIM2 Initialization Function
+  * @brief TIM3 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_TIM2_Init(void)
+static void MX_TIM3_Init(void)
 {
 
-  /* USER CODE BEGIN TIM2_Init 0 */
+  /* USER CODE BEGIN TIM3_Init 0 */
 
-  /* USER CODE END TIM2_Init 0 */
+  /* USER CODE END TIM3_Init 0 */
 
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
 
-  /* USER CODE BEGIN TIM2_Init 1 */
+  /* USER CODE BEGIN TIM3_Init 1 */
 
-  /* USER CODE END TIM2_Init 1 */
-  htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 0;
-  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 41999999;
-  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 2099;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 19999;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
   {
     Error_Handler();
   }
   sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
   {
     Error_Handler();
   }
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN TIM2_Init 2 */
+  /* USER CODE BEGIN TIM3_Init 2 */
 
-  /* USER CODE END TIM2_Init 2 */
+  /* USER CODE END TIM3_Init 2 */
 
 }
 

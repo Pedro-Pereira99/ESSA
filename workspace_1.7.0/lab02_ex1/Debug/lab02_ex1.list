@@ -385,24 +385,25 @@ int main(void)
   MX_USART2_UART_Init();
  80004e2:	f000 f88d 	bl	8000600 <MX_USART2_UART_Init>
 
+  GPIO_PinState previous_read; // This variable is used to store an old  reading of the pushbutton
+  // Which will be compared to a new reading, and allow for the software deboucing
   while (1)
   {
-    /* USER CODE END WHILE */
-
-	  previous_read = HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
+	  previous_read = HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin); // Store the reading of the push button in this auxiliary variable
  80004e6:	f44f 5100 	mov.w	r1, #8192	; 0x2000
  80004ea:	480d      	ldr	r0, [pc, #52]	; (8000520 <main+0x50>)
  80004ec:	f000 fcfc 	bl	8000ee8 <HAL_GPIO_ReadPin>
  80004f0:	4603      	mov	r3, r0
  80004f2:	71fb      	strb	r3, [r7, #7]
-	  if(previous_read == GPIO_PIN_RESET ){
+
+	  if(previous_read == GPIO_PIN_RESET ){ // If the push button was pressed
  80004f4:	79fb      	ldrb	r3, [r7, #7]
  80004f6:	2b00      	cmp	r3, #0
  80004f8:	d1f5      	bne.n	80004e6 <main+0x16>
-			 HAL_Delay(100);
+			 HAL_Delay(100); // wait 100 ms, this value was found by trial and error to work well
  80004fa:	2064      	movs	r0, #100	; 0x64
  80004fc:	f000 fa66 	bl	80009cc <HAL_Delay>
-			 if(previous_read == HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin)){
+			 if(previous_read == HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin)){ // If the value is still the same, then no bouncing was detected
  8000500:	f44f 5100 	mov.w	r1, #8192	; 0x2000
  8000504:	4806      	ldr	r0, [pc, #24]	; (8000520 <main+0x50>)
  8000506:	f000 fcef 	bl	8000ee8 <HAL_GPIO_ReadPin>
@@ -411,11 +412,11 @@ int main(void)
  800050e:	79fb      	ldrb	r3, [r7, #7]
  8000510:	4293      	cmp	r3, r2
  8000512:	d1e8      	bne.n	80004e6 <main+0x16>
-				 HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+				 HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin); // Switch the state of the pin
  8000514:	2120      	movs	r1, #32
  8000516:	4803      	ldr	r0, [pc, #12]	; (8000524 <main+0x54>)
  8000518:	f000 fd17 	bl	8000f4a <HAL_GPIO_TogglePin>
-	  previous_read = HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
+	  previous_read = HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin); // Store the reading of the push button in this auxiliary variable
  800051c:	e7e3      	b.n	80004e6 <main+0x16>
  800051e:	bf00      	nop
  8000520:	40020800 	.word	0x40020800
