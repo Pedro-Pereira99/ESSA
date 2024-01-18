@@ -60,10 +60,10 @@ static void MX_TIM3_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-volatile int tim2Flag = 0; //Create a flag for the timer
+volatile int timFlag = 0; //Create a flag for the timer
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-	tim2Flag = 1; // The interrupt func is going to set the flag every 500 ms
+	timFlag = 1; // The interrupt func is going to set the flag every 10 ms
 } // The flag will be cleared in the while loop.
 
 
@@ -106,25 +106,26 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  char welcome_message[] = "Exercise 3 has started \r\n"; // Message to transmit in case of any error when reading the data
+  char welcome_message[] = "Exercise 3 has started \r\n"; // Welcome message, useful to know when the program started
 
-  int index = 0;
-  int index_to_print;
-  int unfiltered_x[5] = {0};
+  int index = 0; // Variable for indexing the circular buffer
+  int index_to_print; // Keeps track of which sample to print in the same line as the filtered output. Avoids shifts
+
+  int unfiltered_x[5] = {0}; // Circular buffers for each axis
   int unfiltered_y[5] = {0};
   int unfiltered_z[5] = {0};
 
-  int filtered_xyz[3] = {0};
+  int filtered_xyz[3] = {0}; // Filtered output
 
   IKS01A3_MOTION_SENSOR_Init(IKS01A3_LIS2DW12_0, MOTION_ACCELERO); // Initialize the accelerometer sensor
   IKS01A3_MOTION_SENSOR_Enable(IKS01A3_LIS2DW12_0, MOTION_ACCELERO); // Enable the acc sensor
 
-  HAL_TIM_Base_Start_IT(&htim3);// Start the timer; This will enable interrupts every time the timer is reloaded (every 0.5 sec)
+  HAL_TIM_Base_Start_IT(&htim3);// Start the timer; This will enable interrupts every time the timer is reloaded (every 10 msec)
 
   IKS01A3_MOTION_SENSOR_Axes_t acc_axes; // Struct to save the data of acceleration measured in each axis of space (X Y and Z);
 
 
-  char buffer_acc[40]; // This will help the data transmission
+  char buffer_message[40]; // This will help the data transmission
 
   // Print welcome message
   HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
@@ -133,8 +134,8 @@ int main(void)
   while (1)
   {
 
-	 if(tim2Flag == 1){
-		  tim2Flag = 0; //Clear the interrupt flag of the timer
+	 if(timFlag == 1){
+		  timFlag = 0; //Clear the interrupt flag of the timer
 		  IKS01A3_MOTION_SENSOR_GetAxes(IKS01A3_LIS2DW12_0, MOTION_ACCELERO, &acc_axes); // This function will save the data in the array acc_axes, and return a value that can be useful to finding errors;
 
 		  ///// FILTER IMPLEMENTATION
@@ -171,7 +172,7 @@ int main(void)
 		  // Although this implementation of the filter is fairly simple, it is easy to misinterpret the data transmitted in a way that would generate a shift between the input and the output.
 
 
-		  HAL_UART_Transmit_IT(&huart2, buffer_acc, sprintf(buffer_acc, " %d, %d, %d, %d, %d, %d; \r\n ",
+		  HAL_UART_Transmit_IT(&huart2, buffer_message, sprintf(buffer_message, " %d, %d, %d, %d, %d, %d; \r\n ",
 				  	  	  	  filtered_xyz[0],  filtered_xyz[1],  filtered_xyz[2],
 							  unfiltered_x[index_to_print], unfiltered_y[index_to_print], unfiltered_z[index_to_print])); // Transmits data
 
@@ -251,9 +252,9 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 2099;
+  htim3.Init.Prescaler = 20;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 19999;
+  htim3.Init.Period = 39999;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)

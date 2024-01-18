@@ -1,81 +1,81 @@
-12:51:43 **** Incremental Build of configuration Debug for project lab05_ex1 ****
+19:16:07 **** Build of configuration Debug for project lab05_ex1 ****
 make -j8 all 
 arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F401xE -c -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../X-CUBE-MEMS1/Target -I../Drivers/BSP/Components/lsm6dso -I../Drivers/BSP/Components/lis2dw12 -I../Drivers/BSP/Components/lis2mdl -I../Drivers/BSP/Components/hts221 -I../Drivers/BSP/Components/lps22hh -I../Drivers/BSP/Components/stts751 -I../Drivers/BSP/IKS01A3 -I../Drivers/BSP/Components/Common -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
 ../Core/Src/main.c: In function 'main':
-../Core/Src/main.c:138:61: warning: implicit declaration of function 'sprintf' [-Wimplicit-function-declaration]
-  138 |                   HAL_UART_Transmit_IT(&huart2, buffer_acc, sprintf(buffer_acc, " %d, %d, %d, %d, %d, %d; \r\n ",
-      |                                                             ^~~~~~~
+../Core/Src/main.c:135:57: warning: implicit declaration of function 'sprintf' [-Wimplicit-function-declaration]
+  135 |                   HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, " %d, %d, %d, %d, %d, %d; \r\n ",
+      |                                                         ^~~~~~~
 ../Core/Src/main.c:26:1: note: include '<stdio.h>' or provide a declaration of 'sprintf'
    25 | #include "iks01a3_conf.h"
   +++ |+#include <stdio.h>
    26 | /* USER CODE END Includes */
-../Core/Src/main.c:138:61: warning: incompatible implicit declaration of built-in function 'sprintf' [-Wbuiltin-declaration-mismatch]
-  138 |                   HAL_UART_Transmit_IT(&huart2, buffer_acc, sprintf(buffer_acc, " %d, %d, %d, %d, %d, %d; \r\n ",
-      |                                                             ^~~~~~~
-../Core/Src/main.c:138:61: note: include '<stdio.h>' or provide a declaration of 'sprintf'
-../Core/Src/main.c:138:84: warning: format '%d' expects argument of type 'int', but argument 3 has type 'int32_t' {aka 'long int'} [-Wformat=]
-  138 |                   HAL_UART_Transmit_IT(&huart2, buffer_acc, sprintf(buffer_acc, " %d, %d, %d, %d, %d, %d; \r\n ",
+../Core/Src/main.c:135:57: warning: incompatible implicit declaration of built-in function 'sprintf' [-Wbuiltin-declaration-mismatch]
+  135 |                   HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, " %d, %d, %d, %d, %d, %d; \r\n ",
+      |                                                         ^~~~~~~
+../Core/Src/main.c:135:57: note: include '<stdio.h>' or provide a declaration of 'sprintf'
+../Core/Src/main.c:135:76: warning: format '%d' expects argument of type 'int', but argument 3 has type 'int32_t' {aka 'long int'} [-Wformat=]
+  135 |                   HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, " %d, %d, %d, %d, %d, %d; \r\n ",
+      |                                                                           ~^
+      |                                                                            |
+      |                                                                            int
+      |                                                                           %ld
+  136 |                                                           acc_axes.x, acc_axes.y, acc_axes.z, gyro_axes.x, gyro_axes.y, gyro_axes.z));
+      |                                                           ~~~~~~~~~~        
+      |                                                                   |
+      |                                                                   int32_t {aka long int}
+../Core/Src/main.c:135:80: warning: format '%d' expects argument of type 'int', but argument 4 has type 'int32_t' {aka 'long int'} [-Wformat=]
+  135 |                   HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, " %d, %d, %d, %d, %d, %d; \r\n ",
+      |                                                                               ~^
+      |                                                                                |
+      |                                                                                int
+      |                                                                               %ld
+  136 |                                                           acc_axes.x, acc_axes.y, acc_axes.z, gyro_axes.x, gyro_axes.y, gyro_axes.z));
+      |                                                                       ~~~~~~~~~~
+      |                                                                               |
+      |                                                                               int32_t {aka long int}
+../Core/Src/main.c:135:84: warning: format '%d' expects argument of type 'int', but argument 5 has type 'int32_t' {aka 'long int'} [-Wformat=]
+  135 |                   HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, " %d, %d, %d, %d, %d, %d; \r\n ",
       |                                                                                   ~^
       |                                                                                    |
       |                                                                                    int
       |                                                                                   %ld
-  139 |                                                           acc_axes.x, acc_axes.y, acc_axes.z, gyro_axes.x, gyro_axes.y, gyro_axes.z)); // Transmits acceleration in the X axis
-      |                                                           ~~~~~~~~~~                
-      |                                                                   |
-      |                                                                   int32_t {aka long int}
-../Core/Src/main.c:138:88: warning: format '%d' expects argument of type 'int', but argument 4 has type 'int32_t' {aka 'long int'} [-Wformat=]
-  138 |                   HAL_UART_Transmit_IT(&huart2, buffer_acc, sprintf(buffer_acc, " %d, %d, %d, %d, %d, %d; \r\n ",
+  136 |                                                           acc_axes.x, acc_axes.y, acc_axes.z, gyro_axes.x, gyro_axes.y, gyro_axes.z));
+      |                                                                                   ~~~~~~~~~~
+      |                                                                                           |
+      |                                                                                           int32_t {aka long int}
+../Core/Src/main.c:135:88: warning: format '%d' expects argument of type 'int', but argument 6 has type 'int32_t' {aka 'long int'} [-Wformat=]
+  135 |                   HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, " %d, %d, %d, %d, %d, %d; \r\n ",
       |                                                                                       ~^
       |                                                                                        |
       |                                                                                        int
       |                                                                                       %ld
-  139 |                                                           acc_axes.x, acc_axes.y, acc_axes.z, gyro_axes.x, gyro_axes.y, gyro_axes.z)); // Transmits acceleration in the X axis
-      |                                                                       ~~~~~~~~~~        
-      |                                                                               |
-      |                                                                               int32_t {aka long int}
-../Core/Src/main.c:138:92: warning: format '%d' expects argument of type 'int', but argument 5 has type 'int32_t' {aka 'long int'} [-Wformat=]
-  138 |                   HAL_UART_Transmit_IT(&huart2, buffer_acc, sprintf(buffer_acc, " %d, %d, %d, %d, %d, %d; \r\n ",
+  136 |                                                           acc_axes.x, acc_axes.y, acc_axes.z, gyro_axes.x, gyro_axes.y, gyro_axes.z));
+      |                                                                                               ~~~~~~~~~~~
+      |                                                                                                        |
+      |                                                                                                        int32_t {aka long int}
+../Core/Src/main.c:135:92: warning: format '%d' expects argument of type 'int', but argument 7 has type 'int32_t' {aka 'long int'} [-Wformat=]
+  135 |                   HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, " %d, %d, %d, %d, %d, %d; \r\n ",
       |                                                                                           ~^
       |                                                                                            |
       |                                                                                            int
       |                                                                                           %ld
-  139 |                                                           acc_axes.x, acc_axes.y, acc_axes.z, gyro_axes.x, gyro_axes.y, gyro_axes.z)); // Transmits acceleration in the X axis
-      |                                                                                   ~~~~~~~~~~
-      |                                                                                           |
-      |                                                                                           int32_t {aka long int}
-../Core/Src/main.c:138:96: warning: format '%d' expects argument of type 'int', but argument 6 has type 'int32_t' {aka 'long int'} [-Wformat=]
-  138 |                   HAL_UART_Transmit_IT(&huart2, buffer_acc, sprintf(buffer_acc, " %d, %d, %d, %d, %d, %d; \r\n ",
+  136 |                                                           acc_axes.x, acc_axes.y, acc_axes.z, gyro_axes.x, gyro_axes.y, gyro_axes.z));
+      |                                                                                                            ~~~~~~~~~~~
+      |                                                                                                                     |
+      |                                                                                                                     int32_t {aka long int}
+../Core/Src/main.c:135:96: warning: format '%d' expects argument of type 'int', but argument 8 has type 'int32_t' {aka 'long int'} [-Wformat=]
+  135 |                   HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, " %d, %d, %d, %d, %d, %d; \r\n ",
       |                                                                                               ~^
       |                                                                                                |
       |                                                                                                int
       |                                                                                               %ld
-  139 |                                                           acc_axes.x, acc_axes.y, acc_axes.z, gyro_axes.x, gyro_axes.y, gyro_axes.z)); // Transmits acceleration in the X axis
-      |                                                                                               ~~~~~~~~~~~
-      |                                                                                                        |
-      |                                                                                                        int32_t {aka long int}
-../Core/Src/main.c:138:100: warning: format '%d' expects argument of type 'int', but argument 7 has type 'int32_t' {aka 'long int'} [-Wformat=]
-  138 |                   HAL_UART_Transmit_IT(&huart2, buffer_acc, sprintf(buffer_acc, " %d, %d, %d, %d, %d, %d; \r\n ",
-      |                                                                                                   ~^
-      |                                                                                                    |
-      |                                                                                                    int
-      |                                                                                                   %ld
-  139 |                                                           acc_axes.x, acc_axes.y, acc_axes.z, gyro_axes.x, gyro_axes.y, gyro_axes.z)); // Transmits acceleration in the X axis
-      |                                                                                                            ~~~~~~~~~~~
-      |                                                                                                                     |
-      |                                                                                                                     int32_t {aka long int}
-../Core/Src/main.c:138:104: warning: format '%d' expects argument of type 'int', but argument 8 has type 'int32_t' {aka 'long int'} [-Wformat=]
-  138 |                   HAL_UART_Transmit_IT(&huart2, buffer_acc, sprintf(buffer_acc, " %d, %d, %d, %d, %d, %d; \r\n ",
-      |                                                                                                       ~^
-      |                                                                                                        |
-      |                                                                                                        int
-      |                                                                                                       %ld
-  139 |                                                           acc_axes.x, acc_axes.y, acc_axes.z, gyro_axes.x, gyro_axes.y, gyro_axes.z)); // Transmits acceleration in the X axis
+  136 |                                                           acc_axes.x, acc_axes.y, acc_axes.z, gyro_axes.x, gyro_axes.y, gyro_axes.z));
       |                                                                                                                         ~~~~~~~~~~~
       |                                                                                                                                  |
       |                                                                                                                                  int32_t {aka long int}
-../Core/Src/main.c:138:49: warning: pointer targets in passing argument 2 of 'HAL_UART_Transmit_IT' differ in signedness [-Wpointer-sign]
-  138 |                   HAL_UART_Transmit_IT(&huart2, buffer_acc, sprintf(buffer_acc, " %d, %d, %d, %d, %d, %d; \r\n ",
-      |                                                 ^~~~~~~~~~
+../Core/Src/main.c:135:49: warning: pointer targets in passing argument 2 of 'HAL_UART_Transmit_IT' differ in signedness [-Wpointer-sign]
+  135 |                   HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, " %d, %d, %d, %d, %d, %d; \r\n ",
+      |                                                 ^~~~~~
       |                                                 |
       |                                                 char *
 In file included from ../Core/Inc/stm32f4xx_hal_conf.h:411,
@@ -91,11 +91,11 @@ Finished building target: lab05_ex1.elf
 arm-none-eabi-size  lab05_ex1.elf 
 arm-none-eabi-objdump -h -S lab05_ex1.elf  > "lab05_ex1.list"
    text	   data	    bss	    dec	    hex	filename
-  40788	    312	   2376	  43476	   a9d4	lab05_ex1.elf
+  40792	    312	   2376	  43480	   a9d8	lab05_ex1.elf
 Finished building: default.size.stdout
  
 Finished building: lab05_ex1.list
  
 
-12:51:45 Build Finished. 0 errors, 9 warnings. (took 1s.358ms)
+19:16:09 Build Finished. 0 errors, 9 warnings. (took 1s.802ms)
 

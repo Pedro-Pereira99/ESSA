@@ -1,23 +1,53 @@
-19:19:01 **** Incremental Build of configuration Debug for project lab05_ex4 ****
+15:17:45 **** Incremental Build of configuration Debug for project lab05_ex4 ****
 make -j8 all 
 arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F401xE -c -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../X-CUBE-MEMS1/Target -I../Drivers/BSP/Components/lsm6dso -I../Drivers/BSP/Components/lis2dw12 -I../Drivers/BSP/Components/lis2mdl -I../Drivers/BSP/Components/hts221 -I../Drivers/BSP/Components/lps22hh -I../Drivers/BSP/Components/stts751 -I../Drivers/BSP/IKS01A3 -I../Drivers/BSP/Components/Common -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
 ../Core/Src/main.c: In function 'main':
-../Core/Src/main.c:219:69: warning: implicit declaration of function 'sprintf' [-Wimplicit-function-declaration]
-  219 |                           HAL_UART_Transmit_IT(&huart2, buffer_acc, sprintf(buffer_acc, " %d, %d, %d,   %d, %d, %d,   %f, %f, %f; \r\n ",
-      |                                                                     ^~~~~~~
+../Core/Src/main.c:219:89: warning: implicit declaration of function 'sprintf' [-Wimplicit-function-declaration]
+  219 |                                           HAL_UART_Transmit_IT(&huart2, buffer_message, sprintf(buffer_message, " %d   %d   %d    %d  %d  %d   %d  %d  %d   %d  %d  %d  \r\n ",
+      |                                                                                         ^~~~~~~
 ../Core/Src/main.c:21:1: note: include '<stdio.h>' or provide a declaration of 'sprintf'
    20 | #include "main.h"
   +++ |+#include <stdio.h>
    21 | 
-../Core/Src/main.c:219:69: warning: incompatible implicit declaration of built-in function 'sprintf' [-Wbuiltin-declaration-mismatch]
-  219 |                           HAL_UART_Transmit_IT(&huart2, buffer_acc, sprintf(buffer_acc, " %d, %d, %d,   %d, %d, %d,   %f, %f, %f; \r\n ",
-      |                                                                     ^~~~~~~
-../Core/Src/main.c:219:69: note: include '<stdio.h>' or provide a declaration of 'sprintf'
-../Core/Src/main.c:219:57: warning: pointer targets in passing argument 2 of 'HAL_UART_Transmit_IT' differ in signedness [-Wpointer-sign]
-  219 |                           HAL_UART_Transmit_IT(&huart2, buffer_acc, sprintf(buffer_acc, " %d, %d, %d,   %d, %d, %d,   %f, %f, %f; \r\n ",
-      |                                                         ^~~~~~~~~~
-      |                                                         |
-      |                                                         char *
+../Core/Src/main.c:219:89: warning: incompatible implicit declaration of built-in function 'sprintf' [-Wbuiltin-declaration-mismatch]
+  219 |                                           HAL_UART_Transmit_IT(&huart2, buffer_message, sprintf(buffer_message, " %d   %d   %d    %d  %d  %d   %d  %d  %d   %d  %d  %d  \r\n ",
+      |                                                                                         ^~~~~~~
+../Core/Src/main.c:219:89: note: include '<stdio.h>' or provide a declaration of 'sprintf'
+../Core/Src/main.c:219:116: warning: format '%d' expects argument of type 'int', but argument 3 has type 'int32_t' {aka 'long int'} [-Wformat=]
+  219 |                                           HAL_UART_Transmit_IT(&huart2, buffer_message, sprintf(buffer_message, " %d   %d   %d    %d  %d  %d   %d  %d  %d   %d  %d  %d  \r\n ",
+      |                                                                                                                   ~^
+      |                                                                                                                    |
+      |                                                                                                                    int
+      |                                                                                                                   %ld
+  220 |                                                                                   acc_axes.x, acc_axes.y, acc_axes.z, // First three columns are unfiltered data
+      |                                                                                   ~~~~~~~~~~                        
+      |                                                                                           |
+      |                                                                                           int32_t {aka long int}
+../Core/Src/main.c:219:121: warning: format '%d' expects argument of type 'int', but argument 4 has type 'int32_t' {aka 'long int'} [-Wformat=]
+  219 |                                           HAL_UART_Transmit_IT(&huart2, buffer_message, sprintf(buffer_message, " %d   %d   %d    %d  %d  %d   %d  %d  %d   %d  %d  %d  \r\n ",
+      |                                                                                                                        ~^
+      |                                                                                                                         |
+      |                                                                                                                         int
+      |                                                                                                                        %ld
+  220 |                                                                                   acc_axes.x, acc_axes.y, acc_axes.z, // First three columns are unfiltered data
+      |                                                                                               ~~~~~~~~~~                 
+      |                                                                                                       |
+      |                                                                                                       int32_t {aka long int}
+../Core/Src/main.c:219:126: warning: format '%d' expects argument of type 'int', but argument 5 has type 'int32_t' {aka 'long int'} [-Wformat=]
+  219 |                                           HAL_UART_Transmit_IT(&huart2, buffer_message, sprintf(buffer_message, " %d   %d   %d    %d  %d  %d   %d  %d  %d   %d  %d  %d  \r\n ",
+      |                                                                                                                             ~^
+      |                                                                                                                              |
+      |                                                                                                                              int
+      |                                                                                                                             %ld
+  220 |                                                                                   acc_axes.x, acc_axes.y, acc_axes.z, // First three columns are unfiltered data
+      |                                                                                                           ~~~~~~~~~~          
+      |                                                                                                                   |
+      |                                                                                                                   int32_t {aka long int}
+../Core/Src/main.c:219:73: warning: pointer targets in passing argument 2 of 'HAL_UART_Transmit_IT' differ in signedness [-Wpointer-sign]
+  219 |                                           HAL_UART_Transmit_IT(&huart2, buffer_message, sprintf(buffer_message, " %d   %d   %d    %d  %d  %d   %d  %d  %d   %d  %d  %d  \r\n ",
+      |                                                                         ^~~~~~~~~~~~~~
+      |                                                                         |
+      |                                                                         char *
 In file included from ../Core/Inc/stm32f4xx_hal_conf.h:411,
                  from ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:29,
                  from ../Core/Inc/main.h:30,
@@ -25,29 +55,17 @@ In file included from ../Core/Inc/stm32f4xx_hal_conf.h:411,
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:747:82: note: expected 'const uint8_t *' {aka 'const unsigned char *'} but argument is of type 'char *'
   747 | HAL_StatusTypeDef HAL_UART_Transmit_IT(UART_HandleTypeDef *huart, const uint8_t *pData, uint16_t Size);
       |                                                                   ~~~~~~~~~~~~~~~^~~~~
-../Core/Src/main.c:219:69: warning: '%f' directive writing between 3 and 317 bytes into a region of size between 0 and 12 [-Wformat-overflow=]
-  219 |                           HAL_UART_Transmit_IT(&huart2, buffer_acc, sprintf(buffer_acc, " %d, %d, %d,   %d, %d, %d,   %f, %f, %f; \r\n ",
-      |                                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  220 |                                                                   filtered_xyz[0], filtered_xyz[1], filtered_xyz[2],
-      |                                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  221 |                                                                   filter50_x, filter50_y, filter50_z,
-      |                                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  222 |                                                                   IRR_xyz[0], IRR_xyz[1], IRR_xyz[2])); // Transmits the data
-      |                                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-../Core/Src/main.c:219:69: note: assuming directive output of 8 bytes
-../Core/Src/main.c:219:69: note: assuming directive output of 8 bytes
-../Core/Src/main.c:219:69: note: 'sprintf' output between 42 and 1044 bytes into a destination of size 40
 arm-none-eabi-gcc -o "lab05_ex4.elf" @"objects.list"   -mcpu=cortex-m4 -T"C:\Users\morae\STM32CubeIDE\workspace_1.7.0\lab05_ex4\STM32F401RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="lab05_ex4.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
 Finished building target: lab05_ex4.elf
  
 arm-none-eabi-size  lab05_ex4.elf 
 arm-none-eabi-objdump -h -S lab05_ex4.elf  > "lab05_ex4.list"
    text	   data	    bss	    dec	    hex	filename
-  55880	    688	   2384	  58952	   e648	lab05_ex4.elf
+  55920	    688	   2384	  58992	   e670	lab05_ex4.elf
 Finished building: default.size.stdout
  
 Finished building: lab05_ex4.list
  
 
-19:19:02 Build Finished. 0 errors, 4 warnings. (took 1s.287ms)
+15:17:47 Build Finished. 0 errors, 6 warnings. (took 1s.846ms)
 

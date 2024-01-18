@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
-		<item key="selection" value=""/>
+		<item key="selection" value="500"/>
 		<item key="wrap" value="true"/>
 		<item key="casesensitive" value="false"/>
 		<item key="wholeword" value="false"/>
 		<item key="incremental" value="false"/>
 		<item key="isRegEx" value="false"/>
 		<list key="findhistory">
+			<item value="500"/>
+			<item value="IRR"/>
+			<item value="buffer_acc"/>
+			<item value="tim2Flag"/>
+			<item value="buffer"/>
 			<item value="main.o"/>
 			<item value=" index "/>
 			<item value=" index"/>
@@ -18,14 +23,13 @@
 			<item value="IKS01A3_MOTION_SENSOR_Enable"/>
 			<item value="IKS01A3_MOTION_SENSOR_GetAxes"/>
 			<item value="IKS01A3_LIS2DW12_0"/>
-			<item value="LIS2DW12"/>
-			<item value="LSM6DS0"/>
-			<item value="IKS01A3_MOTION_SENSOR_Init"/>
-			<item value="welcome"/>
-			<item value="base"/>
 		</list>
 		<list key="replacehistory">
+			<item value="IIR"/>
 			<item value=""/>
+			<item value="buffer_message"/>
+			<item value="buffer"/>
+			<item value="timFlag"/>
 			<item value="index_5coef"/>
 			<item value="five_coef_index"/>
 		</list>

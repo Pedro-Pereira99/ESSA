@@ -22,7 +22,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "iks01a3_motion_sensors.h"
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -60,10 +59,10 @@ static void MX_TIM3_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-volatile int tim2Flag = 0; //Create a flag for the timer
+volatile int timFlag = 0; //Create a flag for the timer
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-	tim2Flag = 1; // The interrupt func is going to set the flag every 500 ms
+	timFlag = 1; // The interrupt func is going to set the flag every 10 ms
 } // The flag will be cleared in the while loop.
 
 
@@ -128,29 +127,30 @@ int main(void)
 
     int index_50coef = 0;
 
-    int sum50_x = 0;
+    int sum50_x = 0; // These variables keep track of the sum of the 50 most recent samples
     int sum50_y = 0;
     int sum50_z = 0;
 
-    int aux50 = 0;
-
-    int filter50_x;
+    int filter50_x; // The filtered value is the sum divided by 50
     int filter50_y;
     int filter50_z;
+
+    int aux50 = 0; // This variable was created to change the behavior of the code once the 50 initial samples become available
     ///////////////////
 
-    // IRR FILTER COEFFICIENTS
-    float fc = 0.1/100 * 2; // The sampling frequency is 2 Hz
-    float beta = exp(-2*3.1416*fc); // the value of beta is equal to x, which is defined by this formula
-    float alfa = 1 - beta;
-    float IRR_xyz[3] = {0}; // In this variable I will store the filtered output for IRR in the axes x y and z
+    // IIR FILTER COEFFICIENTS
+    float fc = 0.3; // The sampling frequency is 100 Hz. This cut-off frequency of 0.3% fs was approximated through trial and error
+    float x = exp(-2*3.1416*fc);
+    float alfa = 1 - x;
+    float beta = x;
+    int IIR_xyz[3] = {0}; // In this variable I will store the filtered output for IIR in the axes x y and z
     //////////////////////
 
 
 
 
-  HAL_TIM_Base_Start_IT(&htim3);// Start the timer; This will enable interrupts every time the timer is reloaded (every 0.5 sec)
-  char buffer_acc[40]; // This will help the data transmission
+  HAL_TIM_Base_Start_IT(&htim3);// Start the timer; This will enable interrupts every time the timer is reloaded (every 10 msec)
+  char buffer_message[128]; // This will help the data transmission
 
   // Print welcome message
   HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
@@ -158,8 +158,8 @@ int main(void)
   while (1)
   {
 
-	 if(tim2Flag == 1){
-		  tim2Flag = 0; //Clear the interrupt flag of the timer
+	 if(timFlag == 1){
+		  timFlag = 0; //Clear the interrupt flag of the timer
 		  IKS01A3_MOTION_SENSOR_GetAxes(IKS01A3_LIS2DW12_0, MOTION_ACCELERO, &acc_axes); // This function will save the data in the array acc_axes, and return a value that can be useful to finding errors;
 		  __HAL_DBGMCU_FREEZE_TIM3(); //Freezes the timer for debugging
 
@@ -186,47 +186,46 @@ int main(void)
 
 		  index_5coef = (index_5coef+1) % 5; //Moves the index for the circular buffer forward. It will go from 0 to 4
 
-		  ////////////  IRR FILTER IMPLEMENTATION
+		  ////////////  IIR FILTER IMPLEMENTATION
 
-		  IRR_xyz[0] = alfa*acc_axes.x + beta*IRR_xyz[0];
-		  IRR_xyz[1] = alfa*acc_axes.y + beta*IRR_xyz[1];
-		  IRR_xyz[2] = alfa*acc_axes.z + beta*IRR_xyz[2];
+		  IIR_xyz[0] = alfa*acc_axes.x + beta*IIR_xyz[0];
+		  IIR_xyz[1] = alfa*acc_axes.y + beta*IIR_xyz[1];
+		  IIR_xyz[2] = alfa*acc_axes.z + beta*IIR_xyz[2];
 
 		  //////////// Moving Average Filter with 50 coefficients
 
 		  sum50_x -= buffer_x[index_50coef];
-		  sum50_y -= buffer_y[index_50coef];
+		  sum50_y -= buffer_y[index_50coef]; //Discard the oldest sample
 		  sum50_z -= buffer_z[index_50coef];
 
-		  buffer_x[index_50coef] = acc_axes.x;
+		  buffer_x[index_50coef] = acc_axes.x; // Store the newest sample
 		  buffer_y[index_50coef] = acc_axes.y;
 		  buffer_z[index_50coef] = acc_axes.z;
 
-		  sum50_x += buffer_x[index_50coef];
+		  sum50_x += buffer_x[index_50coef]; // Add the sample to the sum
 		  sum50_y += buffer_y[index_50coef];
 		  sum50_z += buffer_z[index_50coef];
 
 		  if(aux50 == 1 || index_50coef == 49){  // This conditional will prevent shifts. With this, the first filtered value to be transmitted will be Y[0]
 
-			  aux50 = 1;
-			 // Since this code will only work with integers, this work-around was created to avoid dividing each sample by 50 - this could cause the samples to be lost
-			 // With this, the code only performs the division by 50 once fifty samples have been summed
-			 filter50_x = sum50_x / 50;
-			 filter50_y = sum50_y / 50;
-			 filter50_z = sum50_z / 50;
+		 			  aux50 = 1;
+		 			 // Since this code will only work with integers, this work-around was created to avoid dividing each sample by 50 - this could cause the samples to be lost
+		 			 // With this, the code only performs the division by 50 once fifty samples have been summed
+		 			 filter50_x = sum50_x / 50;
+		 			 filter50_y = sum50_y / 50;
+		 			 filter50_z = sum50_z / 50;
 
 
-			  HAL_UART_Transmit_IT(&huart2, buffer_acc, sprintf(buffer_acc, " %d, %d, %d,   %d, %d, %d,   %f, %f, %f; \r\n ",
-					  	  	  	  filtered_xyz[0], filtered_xyz[1], filtered_xyz[2],
-								  filter50_x, filter50_y, filter50_z,
-								  IRR_xyz[0], IRR_xyz[1], IRR_xyz[2])); // Transmits the data
+		 			  HAL_UART_Transmit_IT(&huart2, buffer_message, sprintf(buffer_message, " %d   %d   %d    %d  %d  %d   %d  %d  %d   %d  %d  %d  \r\n ",
+		 					  	  	  	  acc_axes.x, acc_axes.y, acc_axes.z, // First three columns are unfiltered data
+		 					  	  	  	  filtered_xyz[0], filtered_xyz[1], filtered_xyz[2], // Second triple of columns is 5coef filter
+		 								  filter50_x, filter50_y, filter50_z, // Third triple is 50 coef filter
+		 								  IIR_xyz[0], IIR_xyz[1], IIR_xyz[2])); // Last triple is IIR filter
 
 
-		  }
+		 		  }
 
-		  index_50coef = (index_50coef+1) % 50;
-
-
+		 		  index_50coef = (index_50coef+1) % 50; // Move the circular buffer forward
 
 	 }
     /* USER CODE END WHILE */
@@ -301,9 +300,9 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 2099;
+  htim3.Init.Prescaler = 20;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 19999;
+  htim3.Init.Period = 39999;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)

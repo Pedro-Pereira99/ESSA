@@ -60,10 +60,10 @@ static void MX_TIM3_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-volatile int tim2Flag = 0; //Create a flag for the timer
+volatile int timFlag = 0; //Create a flag for the timer
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-	tim2Flag = 1; // The interrupt func is going to set the flag every 500 ms
+	timFlag = 1; // The interrupt func is going to set the flag every 500 ms
 } // The flag will be cleared in the while loop.
 
 
@@ -105,7 +105,6 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-
   char welcome_message[] = "Program has started \r\n"; // Message to transmit in case of any error when reading the data
 
 
@@ -120,24 +119,23 @@ int main(void)
   IKS01A3_MOTION_SENSOR_Axes_t acc_axes; // Struct to save the data of acceleration measured in each axis of space (X Y and Z);
   IKS01A3_MOTION_SENSOR_Axes_t gyro_axes; // Struct to save the data of angular velocity measured in each axis of space (X Y and Z);
 
-  char buffer_acc[40]; // This will help the data transmission
+  char buffer[40]; // This will help the data transmission
 
   // Print welcome message
   HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
-
-
   while (1)
   {
 
-	 if(tim2Flag == 1){
-		  tim2Flag = 0; //Clear the interrupt flag of the timer
+	 if(timFlag == 1){
+		  timFlag = 0; //Clear the interrupt flag of the timer
 		  IKS01A3_MOTION_SENSOR_GetAxes(IKS01A3_LSM6DSO_0, MOTION_GYRO, &gyro_axes); // This function will save the data in the array gyro_axes, and return a value that can be useful to finding errors;
 		  IKS01A3_MOTION_SENSOR_GetAxes(IKS01A3_LIS2DW12_0, MOTION_ACCELERO, &acc_axes); // This function will save the data in the array acc_axes, and return a value that can be useful to finding errors;
 
 
-		  HAL_UART_Transmit_IT(&huart2, buffer_acc, sprintf(buffer_acc, " %d, %d, %d, %d, %d, %d; \r\n ",
-				  	  	  	  acc_axes.x, acc_axes.y, acc_axes.z, gyro_axes.x, gyro_axes.y, gyro_axes.z)); // Transmits acceleration in the X axis
-
+		  HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, " %d, %d, %d, %d, %d, %d; \r\n ",
+				  	  	  	  acc_axes.x, acc_axes.y, acc_axes.z, gyro_axes.x, gyro_axes.y, gyro_axes.z));
+		  // Transmits the data. First three columns are acceleration, the last three are angular velocity.
+		  // The units are mG and mdps (milli degrees per second)
 
 	 }
     /* USER CODE END WHILE */

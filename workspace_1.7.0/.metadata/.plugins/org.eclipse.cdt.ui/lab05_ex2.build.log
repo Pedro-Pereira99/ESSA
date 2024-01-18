@@ -1,10 +1,41 @@
-12:48:14 **** Incremental Build of configuration Debug for project lab05_ex2 ****
+19:30:05 **** Incremental Build of configuration Debug for project lab05_ex2 ****
 make -j8 all 
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F401xE -c -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../X-CUBE-MEMS1/Target -I../Drivers/BSP/Components/lsm6dso -I../Drivers/BSP/Components/lis2dw12 -I../Drivers/BSP/Components/lis2mdl -I../Drivers/BSP/Components/hts221 -I../Drivers/BSP/Components/lps22hh -I../Drivers/BSP/Components/stts751 -I../Drivers/BSP/IKS01A3 -I../Drivers/BSP/Components/Common -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
+../Core/Src/main.c: In function 'main':
+../Core/Src/main.c:137:49: warning: implicit declaration of function 'sprintf' [-Wimplicit-function-declaration]
+  137 |           HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "%f, %f, %f; \r\n", temperature, humidity, pressure)); // Transmits humidity data
+      |                                                 ^~~~~~~
+../Core/Src/main.c:21:1: note: include '<stdio.h>' or provide a declaration of 'sprintf'
+   20 | #include "main.h"
+  +++ |+#include <stdio.h>
+   21 | 
+../Core/Src/main.c:137:49: warning: incompatible implicit declaration of built-in function 'sprintf' [-Wbuiltin-declaration-mismatch]
+  137 |           HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "%f, %f, %f; \r\n", temperature, humidity, pressure)); // Transmits humidity data
+      |                                                 ^~~~~~~
+../Core/Src/main.c:137:49: note: include '<stdio.h>' or provide a declaration of 'sprintf'
+../Core/Src/main.c:137:41: warning: pointer targets in passing argument 2 of 'HAL_UART_Transmit_IT' differ in signedness [-Wpointer-sign]
+  137 |           HAL_UART_Transmit_IT(&huart2, buffer, sprintf(buffer, "%f, %f, %f; \r\n", temperature, humidity, pressure)); // Transmits humidity data
+      |                                         ^~~~~~
+      |                                         |
+      |                                         char *
+In file included from ../Core/Inc/stm32f4xx_hal_conf.h:411,
+                 from ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:29,
+                 from ../Core/Inc/main.h:30,
+                 from ../Core/Src/main.c:20:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:747:82: note: expected 'const uint8_t *' {aka 'const unsigned char *'} but argument is of type 'char *'
+  747 | HAL_StatusTypeDef HAL_UART_Transmit_IT(UART_HandleTypeDef *huart, const uint8_t *pData, uint16_t Size);
+      |                                                                   ~~~~~~~~~~~~~~~^~~~~
+arm-none-eabi-gcc -o "lab05_ex2.elf" @"objects.list"   -mcpu=cortex-m4 -T"C:\Users\morae\STM32CubeIDE\workspace_1.7.0\lab05_ex2\STM32F401RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="lab05_ex2.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: lab05_ex2.elf
+ 
 arm-none-eabi-size  lab05_ex2.elf 
+arm-none-eabi-objdump -h -S lab05_ex2.elf  > "lab05_ex2.list"
    text	   data	    bss	    dec	    hex	filename
-  44776	    660	   2388	  47824	   bad0	lab05_ex2.elf
+  44856	    660	   2388	  47904	   bb20	lab05_ex2.elf
 Finished building: default.size.stdout
  
+Finished building: lab05_ex2.list
+ 
 
-12:48:15 Build Finished. 0 errors, 0 warnings. (took 591ms)
+19:30:06 Build Finished. 0 errors, 3 warnings. (took 1s.506ms)
 

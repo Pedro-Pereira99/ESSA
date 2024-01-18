@@ -22,7 +22,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "iks01a3_env_sensors.h"
-#include "iks01a3_conf.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -60,10 +59,10 @@ static void MX_TIM3_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-volatile int tim2Flag = 0; //Create a flag for the timer
+volatile int timFlag = 0; //Create a flag for the timer
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-	tim2Flag = 1; // The interrupt func is going to set the flag every 500 ms
+	timFlag = 1; // The interrupt func is going to set the flag every 500 ms
 } // The flag will be cleared in the while loop.
 
 
@@ -105,6 +104,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  char welcome_message[] = "Program has started \r\n"; // Message to transmit in case of any error when reading the data
 
   IKS01A3_ENV_SENSOR_Init(IKS01A3_HTS221_0, ENV_HUMIDITY); // Initialize the humidity sensor
   IKS01A3_ENV_SENSOR_Init(IKS01A3_STTS751_0, ENV_TEMPERATURE); // Initialize the temperature sensor
@@ -122,12 +122,13 @@ int main(void)
 
   char buffer[50]; // This will help the data transmission
 
- 	HAL_TIM_Base_Start_IT(&htim3);// Start the timer; This will enable interrupts every time the timer is reloaded (every 0.5 sec)
-
+	HAL_TIM_Base_Start_IT(&htim3);// Start the timer; This will enable interrupts every time the timer is reloaded (every 0.5 sec)
+	 // Print welcome message
+	  HAL_UART_Transmit_IT(&huart2, (uint8_t *)welcome_message, sizeof(char)*strlen(welcome_message));
 	while (1)
 	{
-	 if(tim2Flag == 1){
-	  tim2Flag = 0; //Clear the interrupt flag of the timer
+	 if(timFlag == 1){
+	  timFlag = 0; //Clear the interrupt flag of the timer
 
 	  IKS01A3_ENV_SENSOR_GetValue(IKS01A3_HTS221_0, ENV_HUMIDITY, &humidity); // Saves the output in the "humidity" variable, and returns a value useful to find errors
 	  IKS01A3_ENV_SENSOR_GetValue(IKS01A3_STTS751_0, ENV_TEMPERATURE, &temperature); // Saves the output in the "temperature" variable, and returns a value useful to find errors
